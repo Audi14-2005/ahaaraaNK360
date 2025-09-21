@@ -1,0 +1,39 @@
+services:
+  # Web service
+  - type: web
+    name: aahaara-360-web
+    env: python
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: python -m gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: DJANGO_SETTINGS_MODULE
+        value: myproject.settings_production
+      - key: GEMINI_API_KEY
+        sync: false  # Set this in Render dashboard
+      - key: FRONTEND_URL
+        sync: false  # Set this if you have a frontend
+      - key: CUSTOM_DOMAIN
+        sync: false  # Set this if you have a custom domain
+
+  # PostgreSQL database (optional - you can use external database)
+  - type: pserv
+    name: aahaara-360-db
+    env: postgresql
+    plan: free
+    ipAllowList: []
+    maxConnections: 97
+    disk:
+      name: aahaara-360-db-disk
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
