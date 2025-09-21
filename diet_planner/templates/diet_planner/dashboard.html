@@ -1,0 +1,804 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Diet Planner Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+    
+    /* CSS Variables */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --food-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        --glass-bg: rgba(255, 255, 255, 0.15);
+        --glass-border: rgba(255, 255, 255, 0.25);
+        --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.37);
+        --shadow-heavy: 0 15px 35px rgba(31, 38, 135, 0.2);
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+    }
+    
+    /* Enhanced animated background */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(-45deg, #ff9a9e, #fecfef, #fecfef, #ff9a9e, #a8edea, #fed6e3);
+        background-size: 600% 600%;
+        animation: gradientShift 20s ease infinite;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(255, 154, 158, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(168, 237, 234, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(254, 214, 227, 0.3) 0%, transparent 50%);
+        animation: float 25s ease-in-out infinite;
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        33% { transform: translateY(-30px) rotate(2deg); }
+        66% { transform: translateY(15px) rotate(-1deg); }
+    }
+    
+    /* Main container */
+    .container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 0 20px;
+    }
+    
+    /* Welcome header */
+    .welcome-header {
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border-radius: 30px;
+        border: 2px solid var(--glass-border);
+        box-shadow: var(--shadow-heavy);
+        padding: 40px;
+        margin-bottom: 40px;
+        text-align: center;
+        animation: slideInDown 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .welcome-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 4s infinite;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-60px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    .welcome-title {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 15px 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        margin: 0 0 25px 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .welcome-stats {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .welcome-stat {
+        text-align: center;
+        padding: 20px 25px;
+        background: var(--glass-bg);
+        border-radius: 20px;
+        border: 2px solid var(--glass-border);
+        backdrop-filter: blur(15px);
+        animation: fadeInScale 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: all 0.3s ease;
+    }
+    
+    .welcome-stat:nth-child(1) { animation-delay: 0.1s; }
+    .welcome-stat:nth-child(2) { animation-delay: 0.2s; }
+    .welcome-stat:nth-child(3) { animation-delay: 0.3s; }
+    .welcome-stat:nth-child(4) { animation-delay: 0.4s; }
+    
+    .welcome-stat:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--success-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+    
+    /* Quick actions grid */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .action-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        border: 2px solid var(--glass-border);
+        box-shadow: var(--shadow-heavy);
+        padding: 30px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 1.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .action-card:nth-child(1) { animation-delay: 0.1s; }
+    .action-card:nth-child(2) { animation-delay: 0.2s; }
+    .action-card:nth-child(3) { animation-delay: 0.3s; }
+    .action-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .action-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .action-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .action-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        animation: bounce 2s infinite;
+        display: block;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    .action-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 15px 0;
+    }
+    
+    .action-description {
+        color: var(--text-secondary);
+        margin: 0 0 25px 0;
+        line-height: 1.6;
+    }
+    
+    .action-btn {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .action-btn:hover::before {
+        left: 100%;
+    }
+    
+    /* Recent activity */
+    .recent-activity {
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        border: 2px solid var(--glass-border);
+        box-shadow: var(--shadow-heavy);
+        padding: 30px;
+        margin-bottom: 40px;
+        animation: slideInUp 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 25px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .activity-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .activity-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--success-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 5px 0;
+    }
+    
+    .activity-description {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    .activity-time {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    /* AI insights */
+    .ai-insights {
+        background: var(--glass-bg);
+        backdrop-filter: blur(25px);
+        border-radius: 25px;
+        border: 2px solid var(--glass-border);
+        box-shadow: var(--shadow-heavy);
+        padding: 30px;
+        animation: slideInUp 1.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ai-insights::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--success-gradient);
+    }
+    
+    .insight-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .insight-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .insight-icon {
+        font-size: 1.5rem;
+        color: #4facfe;
+        margin-top: 5px;
+    }
+    
+    .insight-content {
+        flex: 1;
+    }
+    
+    .insight-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 8px 0;
+    }
+    
+    .insight-description {
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.6;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 15px;
+        }
+        
+        .welcome-title {
+            font-size: 2.2rem;
+        }
+        
+        .welcome-stats {
+            gap: 15px;
+        }
+        
+        .welcome-stat {
+            padding: 15px 20px;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .action-card {
+            padding: 25px 20px;
+        }
+        
+        .action-icon {
+            font-size: 3rem;
+        }
+        
+        .activity-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 15px;
+        }
+        
+        .activity-item:hover {
+            transform: translateY(-3px);
+        }
+    }
+    
+    /* Loading animation */
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+    }
+    
+    .loading::after {
+        content: '';
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--glass-border);
+        border-top: 2px solid var(--primary-gradient);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+        <h1 class="welcome-title">🍽️ Ayurvedic Diet Planner</h1>
+        <p class="welcome-subtitle">AI-Powered Personalized Nutrition for Optimal Health</p>
+        <div class="welcome-stats">
+            <div class="welcome-stat">
+                <div class="stat-number">{{ total_patients }}</div>
+                <div class="stat-label">Total Patients</div>
+            </div>
+            <div class="welcome-stat">
+                <div class="stat-number">{{ total_diet_charts }}</div>
+                <div class="stat-label">Diet Charts</div>
+            </div>
+            <div class="welcome-stat">
+                <div class="stat-number">{{ total_foods }}</div>
+                <div class="stat-label">Food Items</div>
+            </div>
+            <div class="welcome-stat">
+                <div class="stat-number">{{ recent_charts }}</div>
+                <div class="stat-label">This Week</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="action-card">
+            <span class="action-icon">👥</span>
+            <h3 class="action-title">Manage Patients</h3>
+            <p class="action-description">Add new patients, view existing ones, and manage their Ayurvedic profiles for personalized diet planning.</p>
+            <a href="{% url 'diet_planner:patient_list' %}" class="action-btn">
+                <i class="fas fa-users"></i> View Patients
+            </a>
+        </div>
+        
+        <div class="action-card">
+            <span class="action-icon">🤖</span>
+            <h3 class="action-title">AI Chart Generator</h3>
+            <p class="action-description">Generate personalized diet charts using our advanced AI system that considers Prakriti, allergies, and preferences.</p>
+            <a href="{% url 'diet_planner:create_patient' %}" class="action-btn">
+                <i class="fas fa-magic"></i> Create New Chart
+            </a>
+        </div>
+        
+        <div class="action-card">
+            <span class="action-icon">🍎</span>
+            <h3 class="action-title">Food Database</h3>
+            <p class="action-description">Explore our comprehensive database of foods with Ayurvedic properties, nutritional information, and dosha effects.</p>
+            <a href="{% url 'diet_planner:food_database' %}" class="action-btn">
+                <i class="fas fa-database"></i> Browse Foods
+            </a>
+        </div>
+        
+        <div class="action-card">
+            <span class="action-icon">📊</span>
+            <h3 class="action-title">Analytics & Insights</h3>
+            <p class="action-description">View detailed analytics about your patients, diet charts, and get insights into nutritional patterns and trends.</p>
+            <a href="{% url 'diet_planner:analytics' %}" class="action-btn">
+                <i class="fas fa-chart-line"></i> View Analytics
+            </a>
+        </div>
+    </div>
+
+    <!-- Patients Section -->
+    <div class="recent-activity">
+        <h2 class="section-title">
+            <i class="fas fa-users"></i> Your Patients
+        </h2>
+        {% if patients %}
+            {% for patient in patients %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="activity-content">
+                    <h4 class="activity-title">{{ patient.user.first_name }} {{ patient.user.last_name }}</h4>
+                    <p class="activity-description">
+                        Email: {{ patient.user.email }} | 
+                        {% if patient.patient_profile %}
+                            Age: {{ patient.patient_profile.age|default:"Not set" }} | 
+                            Gender: {{ patient.patient_profile.gender|default:"Not set"|title }} | 
+                            Analysis: {% if patient.patient_profile.prakriti_analysis_completed %}✅{% else %}❌{% endif %} Prakriti
+                            {% if patient.patient_profile.disease_analysis_completed %}✅{% else %}❌{% endif %} Disease
+                            {% if patient.patient_profile.health_summary_generated %}✅{% else %}❌{% endif %} Health
+                        {% else %}
+                            No Analysis Completed
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="activity-time">
+                    <a href="{% url 'diet_planner:patient_detail' patient.id %}" class="action-btn" style="padding: 8px 16px; font-size: 0.9rem;">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <h4 class="activity-title">No Assigned Patients Yet</h4>
+                    <p class="activity-description">Patients will appear here once they register and you conduct their analysis. Start by conducting Prakriti analysis for new patients!</p>
+                </div>
+                <div class="activity-time">
+                    <a href="{% url 'user_management:prakriti_analysis' %}" class="action-btn" style="padding: 8px 16px; font-size: 0.9rem;">
+                        <i class="fas fa-leaf"></i> Start Analysis
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <h2 class="section-title">
+            <i class="fas fa-clock"></i> Recent Diet Charts
+        </h2>
+        {% if recent_charts %}
+            {% for chart in recent_charts %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="activity-content">
+                    <h4 class="activity-title">{{ chart.title }}</h4>
+                    <p class="activity-description">Created for {{ chart.patient.name }} - {{ chart.duration_days }} day plan</p>
+                </div>
+                <div class="activity-time">{{ chart.created_at|timesince }} ago</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <h4 class="activity-title">No Recent Charts</h4>
+                    <p class="activity-description">Start by creating your first diet chart for a patient!</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- AI Insights -->
+    <div class="ai-insights">
+        <h2 class="section-title">
+            <i class="fas fa-brain"></i> AI Insights & Recommendations
+        </h2>
+        
+        <div class="insight-item">
+            <div class="insight-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="insight-content">
+                <h4 class="insight-title">Personalized Nutrition</h4>
+                <p class="insight-description">Our AI analyzes each patient's Prakriti (constitution), allergies, and preferences to create truly personalized diet plans that promote optimal health and balance.</p>
+            </div>
+        </div>
+        
+        <div class="insight-item">
+            <div class="insight-icon">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="insight-content">
+                <h4 class="insight-title">Ayurvedic Principles</h4>
+                <p class="insight-description">Every food recommendation is based on traditional Ayurvedic principles, considering taste (Rasa), energy (Virya), and post-digestive effect (Vipaka) for holistic wellness.</p>
+            </div>
+        </div>
+        
+        <div class="insight-item">
+            <div class="insight-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="insight-content">
+                <h4 class="insight-title">Smart Analytics</h4>
+                <p class="insight-description">Track nutritional patterns, monitor patient progress, and get insights into the effectiveness of different diet approaches for continuous improvement.</p>
+            </div>
+        </div>
+        
+        <div class="insight-item">
+            <div class="insight-icon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <div class="insight-content">
+                <h4 class="insight-title">Dynamic Updates</h4>
+                <p class="insight-description">Our system continuously learns and adapts, providing updated recommendations based on the latest nutritional research and Ayurvedic knowledge.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add smooth animations on scroll
+window.addEventListener('scroll', function() {
+    const cards = document.querySelectorAll('.action-card, .activity-item, .insight-item');
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            card.style.animation = 'slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+    });
+});
+
+// Add hover effects to action cards
+document.addEventListener('DOMContentLoaded', function() {
+    const actionCards = document.querySelectorAll('.action-card');
+    actionCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // Add click animation to buttons
+    const buttons = document.querySelectorAll('.action-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+});
+
+// Add CSS for ripple effect
+const style = document.createElement('style');
+style.textContent = `
+    .action-btn {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0);
+        animation: ripple-animation 0.6s linear;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

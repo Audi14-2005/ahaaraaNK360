@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Health Summary - AAHAARA Care{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .summary-header {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .summary-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .summary-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .summary-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+    
+    .dosha-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .dosha-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-radius: 10px;
+        background: #f7fafc;
+    }
+    
+    .dosha-name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .dosha-percentage {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .vata { color: #667eea; }
+    .pitta { color: #ed8936; }
+    .kapha { color: #48bb78; }
+    
+    .calorie-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .calorie-item:last-child {
+        border-bottom: none;
+    }
+    
+    .meal-name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .calorie-value {
+        font-weight: 700;
+        color: #48bb78;
+    }
+    
+    .recommendations {
+        background: #f7fafc;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .recommendations h3 {
+        color: #2d3748;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .recommendation-item {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #48bb78;
+    }
+    
+    .recommendation-item h4 {
+        color: #2d3748;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .recommendation-item p {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-action {
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .bmi-section {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .bmi-value {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .bmi-category {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="summary-container">
+    <div class="summary-header">
+        <h1>📊 Your Health Summary</h1>
+        <p>Personalized insights based on your Prakriti and health analysis</p>
+    </div>
+    
+    <!-- BMI Section -->
+    {% if patient_profile.bmi %}
+    <div class="bmi-section">
+        <div class="bmi-value">{{ patient_profile.bmi }}</div>
+        <div class="bmi-category">
+            {% if patient_profile.bmi < 18.5 %}
+                Underweight
+            {% elif patient_profile.bmi < 25 %}
+                Normal Weight
+            {% elif patient_profile.bmi < 30 %}
+                Overweight
+            {% else %}
+                Obese
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="summary-grid">
+        <!-- Prakriti Analysis Results -->
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    🧘
+                </div>
+                <div class="card-title">Prakriti Analysis</div>
+            </div>
+            
+            <div class="dosha-chart">
+                <div class="dosha-item">
+                    <span class="dosha-name">Vata</span>
+                    <span class="dosha-percentage vata">{{ patient_profile.vata_percentage|floatformat:1 }}%</span>
+                </div>
+                <div class="dosha-item">
+                    <span class="dosha-name">Pitta</span>
+                    <span class="dosha-percentage pitta">{{ patient_profile.pitta_percentage|floatformat:1 }}%</span>
+                </div>
+                <div class="dosha-item">
+                    <span class="dosha-name">Kapha</span>
+                    <span class="dosha-percentage kapha">{{ patient_profile.kapha_percentage|floatformat:1 }}%</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 15px; background: #f7fafc; border-radius: 10px;">
+                <strong>Dominant Dosha:</strong> 
+                <span style="color: #667eea; font-weight: 700;">{{ patient_profile.dominant_dosha|title }}</span>
+            </div>
+        </div>
+        
+        <!-- Calorie Requirements -->
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                    🔥
+                </div>
+                <div class="card-title">Daily Calorie Needs</div>
+            </div>
+            
+            <div class="calorie-item">
+                <span class="meal-name">Total Daily</span>
+                <span class="calorie-value">{{ patient_profile.daily_calorie_needs|floatformat:0 }} cal</span>
+            </div>
+            <div class="calorie-item">
+                <span class="meal-name">Breakfast</span>
+                <span class="calorie-value">{{ patient_profile.breakfast_calories|floatformat:0 }} cal</span>
+            </div>
+            <div class="calorie-item">
+                <span class="meal-name">Lunch</span>
+                <span class="calorie-value">{{ patient_profile.lunch_calories|floatformat:0 }} cal</span>
+            </div>
+            <div class="calorie-item">
+                <span class="meal-name">Dinner</span>
+                <span class="calorie-value">{{ patient_profile.dinner_calories|floatformat:0 }} cal</span>
+            </div>
+            <div class="calorie-item">
+                <span class="meal-name">Snacks</span>
+                <span class="calorie-value">{{ patient_profile.snack_calories|floatformat:0 }} cal</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ayurvedic Recommendations -->
+    <div class="recommendations">
+        <h3>🌿 Ayurvedic Recommendations</h3>
+        
+        <div class="recommendation-item">
+            <h4>For {{ patient_profile.dominant_dosha|title }} Constitution</h4>
+            <p>
+                {% if patient_profile.dominant_dosha == 'vata' %}
+                    Focus on warm, grounding foods. Avoid cold and raw foods. Maintain regular meal times and include healthy fats.
+                {% elif patient_profile.dominant_dosha == 'pitta' %}
+                    Choose cooling, sweet, and bitter foods. Avoid spicy and acidic foods. Eat at regular intervals and stay hydrated.
+                {% else %}
+                    Opt for light, warm, and dry foods. Avoid heavy, oily, and sweet foods. Include plenty of vegetables and maintain regular exercise.
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="recommendation-item">
+            <h4>Meal Timing</h4>
+            <p>
+                Breakfast: 7-9 AM | Lunch: 12-2 PM | Dinner: 6-8 PM
+                <br>
+                Avoid eating 3 hours before bedtime for better digestion.
+            </p>
+        </div>
+        
+        <div class="recommendation-item">
+            <h4>Lifestyle Tips</h4>
+            <p>
+                Maintain regular sleep schedule, practice stress management techniques, and engage in moderate exercise suitable for your constitution.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'user_management:book_appointment' %}" class="btn-action btn-primary">
+            📅 Book Consultation
+        </a>
+        <a href="{% url 'diet_planner:dashboard' %}" class="btn-action btn-success">
+            🍽️ View Diet Charts
+        </a>
+        <a href="{% url 'user_management:prakriti_analysis' %}" class="btn-action btn-warning">
+            🔄 Retake Analysis
+        </a>
+    </div>
+</div>
+{% endblock %}
+

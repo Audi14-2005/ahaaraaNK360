@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Scan Food - AI Food Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .scan-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+    
+    .scan-options {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .scan-options h3 {
+        color: #2d3748;
+        margin-bottom: 30px;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .scan-type-tabs {
+        display: flex;
+        margin-bottom: 30px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .scan-tab {
+        flex: 1;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .scan-tab.active {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+    
+    .scan-tab:hover:not(.active) {
+        background: #e9ecef;
+    }
+    
+    .scan-content {
+        display: none;
+    }
+    
+    .scan-content.active {
+        display: block;
+    }
+    
+    .camera-container {
+        text-align: center;
+    }
+    
+    .camera-preview {
+        width: 100%;
+        max-width: 400px;
+        height: 300px;
+        border: 3px dashed #dee2e6;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        background: #f8f9fa;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .camera-preview video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+    
+    .camera-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+    
+    .camera-placeholder {
+        color: #6c757d;
+        text-align: center;
+    }
+    
+    .camera-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        display: block;
+    }
+    
+    .camera-controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .btn-camera {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-camera:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-camera:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .upload-area {
+        border: 3px dashed #dee2e6;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: #f8f9fa;
+    }
+    
+    .upload-area:hover {
+        border-color: #667eea;
+        background: #f0f2ff;
+    }
+    
+    .upload-area.dragover {
+        border-color: #667eea;
+        background: #f0f2ff;
+        transform: scale(1.02);
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+        display: block;
+    }
+    
+    .upload-text {
+        color: #2d3748;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .upload-hint {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-scan {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        width: 100%;
+    }
+    
+    .btn-scan:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .btn-scan:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .preview-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .preview-section h3 {
+        color: #2d3748;
+        margin-bottom: 30px;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .preview-image {
+        width: 100%;
+        max-width: 400px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin: 0 auto 20px;
+        display: block;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .analysis-preview {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .analysis-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .analysis-item:last-child {
+        border-bottom: none;
+    }
+    
+    .analysis-label {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .analysis-value {
+        color: #6c757d;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .scan-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🍎 Scan Food Item</h1>
+        <p>Use your camera or upload an image to analyze food nutritional and Ayurvedic properties</p>
+    </div>
+    
+    <div class="scan-container">
+        <!-- Scan Options -->
+        <div class="scan-options">
+            <h3>Choose Scan Method</h3>
+            
+            <!-- Scan Type Tabs -->
+            <div class="scan-type-tabs">
+                <button type="button" class="scan-tab active" data-type="camera">
+                    <i class="fas fa-camera me-2"></i>Camera
+                </button>
+                <button type="button" class="scan-tab" data-type="upload">
+                    <i class="fas fa-upload me-2"></i>Upload
+                </button>
+            </div>
+            
+            <!-- Camera Scan Content -->
+            <div id="camera-content" class="scan-content active">
+                <div class="camera-container">
+                    <div class="camera-preview" id="cameraPreview">
+                        <div class="camera-placeholder">
+                            <i class="fas fa-camera"></i>
+                            <div>Camera Preview</div>
+                        </div>
+                    </div>
+                    
+                    <div class="camera-controls">
+                        <button type="button" class="btn-camera" id="startCamera">
+                            <i class="fas fa-play me-2"></i>Start Camera
+                        </button>
+                        <button type="button" class="btn-camera" id="capturePhoto" disabled>
+                            <i class="fas fa-camera me-2"></i>Capture
+                        </button>
+                        <button type="button" class="btn-camera" id="stopCamera" disabled>
+                            <i class="fas fa-stop me-2"></i>Stop
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upload Scan Content -->
+            <div id="upload-content" class="scan-content">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <div class="upload-text">Click to upload or drag & drop</div>
+                    <div class="upload-hint">Supports JPG, PNG, GIF (Max 10MB)</div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            
+            <!-- Scan Form -->
+            <form method="post" enctype="multipart/form-data" id="scanForm">
+                {% csrf_token %}
+                <input type="hidden" name="scan_type" id="scanTypeInput" value="camera">
+                {{ form.image }}
+                
+                <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                    <div class="spinner"></div>
+                    <div>Analyzing food item...</div>
+                </div>
+                
+                <button type="submit" class="btn-scan" id="scanButton" disabled>
+                    <i class="fas fa-search me-2"></i>Analyze Food
+                </button>
+            </form>
+        </div>
+        
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <h3>Preview</h3>
+            <div id="previewContent">
+                <div style="text-align: center; color: #6c757d; padding: 40px;">
+                    <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                    <div>No image selected</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scanTabs = document.querySelectorAll('.scan-tab');
+    const scanContents = document.querySelectorAll('.scan-content');
+    const scanTypeInput = document.getElementById('scanTypeInput');
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const cameraPreview = document.getElementById('cameraPreview');
+    const startCameraBtn = document.getElementById('startCamera');
+    const capturePhotoBtn = document.getElementById('capturePhoto');
+    const stopCameraBtn = document.getElementById('stopCamera');
+    const scanButton = document.getElementById('scanButton');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const previewContent = document.getElementById('previewContent');
+    
+    let stream = null;
+    let capturedImage = null;
+    
+    // Tab switching
+    scanTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const type = this.dataset.type;
+            
+            // Update active tab
+            scanTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update active content
+            scanContents.forEach(content => content.classList.remove('active'));
+            document.getElementById(type + '-content').classList.add('active');
+            
+            // Update form input
+            scanTypeInput.value = type;
+            
+            // Reset preview
+            resetPreview();
+        });
+    });
+    
+    // Camera functionality
+    startCameraBtn.addEventListener('click', async function() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.play();
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.borderRadius = '12px';
+            
+            cameraPreview.innerHTML = '';
+            cameraPreview.appendChild(video);
+            
+            startCameraBtn.disabled = true;
+            capturePhotoBtn.disabled = false;
+            stopCameraBtn.disabled = false;
+            
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            alert('Unable to access camera. Please check permissions.');
+        }
+    });
+    
+    capturePhotoBtn.addEventListener('click', function() {
+        if (stream) {
+            const video = cameraPreview.querySelector('video');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(function(blob) {
+                capturedImage = blob;
+                showPreview(blob);
+                scanButton.disabled = false;
+            }, 'image/jpeg', 0.8);
+        }
+    });
+    
+    stopCameraBtn.addEventListener('click', function() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            
+            cameraPreview.innerHTML = `
+                <div class="camera-placeholder">
+                    <i class="fas fa-camera"></i>
+                    <div>Camera Preview</div>
+                </div>
+            `;
+            
+            startCameraBtn.disabled = false;
+            capturePhotoBtn.disabled = true;
+            stopCameraBtn.disabled = true;
+        }
+    });
+    
+    // File upload functionality
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            showPreview(file);
+            scanButton.disabled = false;
+            
+            // Update scan type to upload
+            scanTypeInput.value = 'upload';
+            
+            // Also update the form's file input
+            const formFileInput = document.querySelector('input[name="image"]');
+            if (formFileInput) {
+                formFileInput.files = e.target.files;
+            }
+        }
+    });
+    
+    // Drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                fileInput.files = files;
+                showPreview(file);
+                scanButton.disabled = false;
+                scanTypeInput.value = 'upload';
+                
+                // Also update the form's file input
+                const formFileInput = document.querySelector('input[name="image"]');
+                if (formFileInput) {
+                    formFileInput.files = files;
+                }
+            }
+        }
+    });
+    
+    // Form submission
+    document.getElementById('scanForm').addEventListener('submit', function(e) {
+        const formFileInput = document.querySelector('input[name="image"]');
+        if (!formFileInput.files || formFileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Please select an image first.');
+            return;
+        }
+        
+        // Show loading spinner
+        loadingSpinner.style.display = 'block';
+        scanButton.disabled = true;
+        
+        // Let the form submit normally
+    });
+    
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewContent.innerHTML = `
+                <img src="${e.target.result}" alt="Preview" class="preview-image">
+                <div class="analysis-preview">
+                    <div class="analysis-item">
+                        <span class="analysis-label">File Size:</span>
+                        <span class="analysis-value">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-label">Type:</span>
+                        <span class="analysis-value">${file.type}</span>
+                    </div>
+                    <div class="analysis-item">
+                        <span class="analysis-label">Status:</span>
+                        <span class="analysis-value">Ready for analysis</span>
+                    </div>
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function resetPreview() {
+        previewContent.innerHTML = `
+            <div style="text-align: center; color: #6c757d; padding: 40px;">
+                <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                <div>No image selected</div>
+            </div>
+        `;
+        scanButton.disabled = true;
+        capturedImage = null;
+        fileInput.value = '';
+    }
+});
+</script>
+{% endblock %}

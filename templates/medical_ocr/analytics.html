@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-chart-bar"></i> Analytics Dashboard</h2>
+            <a href="{% url 'medical_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_documents }}</h4>
+                        <p class="mb-0">Total Documents</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-medical fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ status_stats.completed|default:0 }}</h4>
+                        <p class="mb-0">Successfully Processed</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ status_stats.failed|default:0 }}</h4>
+                        <p class="mb-0">Failed Processing</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ status_stats.processing|default:0 }}</h4>
+                        <p class="mb-0">Currently Processing</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-spinner fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Document Type Distribution -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Document Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                {% if doc_type_stats %}
+                    {% for doc_type, count in doc_type_stats.items %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-capitalize">{{ doc_type|title }}</span>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar" style="width: {{ count|floatformat:0|add:0|mul:100|div:total_documents }}%"></div>
+                                </div>
+                                <span class="badge bg-primary">{{ count }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No data available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Processing Status -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-donut"></i> Processing Status</h5>
+            </div>
+            <div class="card-body">
+                {% if status_stats %}
+                    {% for status, count in status_stats.items %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-capitalize">{{ status|title }}</span>
+                            <div class="d-flex align-items-center">
+                                <div class="progress me-2" style="width: 100px; height: 20px;">
+                                    <div class="progress-bar bg-{% if status == 'completed' %}success{% elif status == 'failed' %}danger{% elif status == 'processing' %}warning{% else %}info{% endif %}" 
+                                         style="width: {{ count|floatformat:0|add:0|mul:100|div:total_documents }}%"></div>
+                                </div>
+                                <span class="badge bg-{% if status == 'completed' %}success{% elif status == 'failed' %}danger{% elif status == 'processing' %}warning{% else %}info{% endif %}">{{ count }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-donut fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No data available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Monthly Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if monthly_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Documents Processed</th>
+                                    <th>Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for month, count in monthly_stats.items %}
+                                    <tr>
+                                        <td>{{ month }}</td>
+                                        <td>{{ count }}</td>
+                                        <td>
+                                            <div class="progress" style="width: 200px;">
+                                                <div class="progress-bar" style="width: {{ count|floatformat:0|add:0|mul:100|div:total_documents }}%">
+                                                    {{ count }}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No monthly data available</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

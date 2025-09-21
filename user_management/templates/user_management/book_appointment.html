@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Book Appointment - AAHAARA 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .appointment-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .appointment-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .appointment-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .appointment-form {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+    }
+    
+    .btn-cancel {
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .btn-cancel:hover {
+        background: #cbd5e0;
+    }
+    
+    .dietitian-info {
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .dietitian-info h3 {
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+    
+    .dietitian-info p {
+        color: #4a5568;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-container">
+    <!-- Header -->
+    <div class="appointment-header">
+        <h1>📅 Book Appointment</h1>
+        <p>Schedule a consultation with our certified dietitians</p>
+    </div>
+    
+    <!-- Dietitian Information -->
+    <div class="dietitian-info">
+        <h3>👨‍⚕️ Available Dietitians</h3>
+        {% if dietitians %}
+            {% for dietitian in dietitians %}
+                <p><strong>{{ dietitian.user.get_full_name }}</strong> - Registered Dietitian</p>
+            {% endfor %}
+            <p>All our dietitians are available for both in-person and virtual consultations.</p>
+        {% else %}
+            <p style="color: #e53e3e;">No dietitians are currently available. Please contact support.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Appointment Form -->
+    <div class="appointment-form">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.dietitian.id_for_label }}">Select Dietitian</label>
+                {{ form.dietitian }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.appointment_date.id_for_label }}">Preferred Date & Time</label>
+                {{ form.appointment_date }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.appointment_type.id_for_label }}">Consultation Type</label>
+                {{ form.appointment_type }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.duration_minutes.id_for_label }}">Duration (minutes)</label>
+                {{ form.duration_minutes }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.reason_for_visit.id_for_label }}">Reason for Visit</label>
+                {{ form.reason_for_visit }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.consultation_fee.id_for_label }}">Consultation Fee</label>
+                {{ form.consultation_fee }}
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                📅 Book Appointment
+            </button>
+            
+            <a href="{% url 'user_management:dashboard' %}" class="btn-cancel">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

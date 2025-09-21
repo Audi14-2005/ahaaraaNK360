@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AAHAARA 360 - Healthcare Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        margin-bottom: 40px;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 60px 0;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto 20px;
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+    
+    .feature-description {
+        color: #718096;
+        line-height: 1.6;
+    }
+    
+    .cta-section {
+        background: #f7fafc;
+        padding: 60px 0;
+        text-align: center;
+    }
+    
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+    }
+    
+    .cta-subtitle {
+        font-size: 1.2rem;
+        color: #718096;
+        margin-bottom: 40px;
+    }
+    
+    .btn-cta {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        margin: 0 10px;
+    }
+    
+    .btn-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+    
+    .stats-section {
+        background: white;
+        padding: 60px 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        text-align: center;
+    }
+    
+    .stat-item {
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        font-size: 1.1rem;
+        color: #718096;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">🌿 AAHAARA 360</h1>
+        <p class="hero-subtitle">Comprehensive Healthcare Management System</p>
+        <p style="font-size: 1.1rem; opacity: 0.8;">AI-powered medical assistance, diet planning, and patient care</p>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container">
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                🤖
+            </div>
+            <h3 class="feature-title">AAHAARA Care AI</h3>
+            <p class="feature-description">
+                Advanced AI chatbot providing instant medical advice, symptom analysis, and health guidance 24/7.
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                📄
+            </div>
+            <h3 class="feature-title">Medical OCR</h3>
+            <p class="feature-description">
+                Upload and analyze medical documents, prescriptions, and reports with AI-powered text recognition.
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
+                🍽️
+            </div>
+            <h3 class="feature-title">Diet Planner</h3>
+            <p class="feature-description">
+                Personalized Ayurvedic diet charts with AI-generated meal plans based on your constitution.
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+                🧘
+            </div>
+            <h3 class="feature-title">Prakriti Analysis</h3>
+            <p class="feature-description">
+                Comprehensive 20-question test to determine your Ayurvedic constitution (Vata, Pitta, Kapha).
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);">
+                📅
+            </div>
+            <h3 class="feature-title">Appointment Booking</h3>
+            <p class="feature-description">
+                Schedule consultations with qualified dietitians and healthcare professionals.
+            </p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                📊
+            </div>
+            <h3 class="feature-title">Health Analytics</h3>
+            <p class="feature-description">
+                Track your health progress with detailed analytics and personalized recommendations.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">20+</div>
+                <div class="stat-label">Prakriti Questions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15+</div>
+                <div class="stat-label">Health Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">AI Powered</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Available</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Ready to Start Your Health Journey?</h2>
+        <p class="cta-subtitle">Join thousands of users who trust AAHAARA 360 for their healthcare needs</p>
+        <a href="{% url 'user_management:register' %}" class="btn-cta">
+            Get Started Now
+        </a>
+        <a href="{% url 'user_management:custom_login' %}" class="btn-cta btn-secondary">
+            Sign In
+        </a>
+    </div>
+</div>
+{% endblock %}

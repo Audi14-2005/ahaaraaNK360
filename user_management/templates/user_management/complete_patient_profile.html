@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Patient Profile - AAHAARA Care{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .profile-header h1 {
+        color: #2d3748;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .profile-header p {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #2d3748;
+        font-weight: 600;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .btn-complete {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-complete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .section-title {
+        color: #2d3748;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 30px 0 20px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h1>👤 Complete Your Patient Profile</h1>
+            <p>Help us provide you with personalized healthcare recommendations</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <h3 class="section-title">Basic Information</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_gender">Gender</label>
+                    {{ form.gender }}
+                </div>
+                <div class="form-group">
+                    <label for="id_blood_group">Blood Group</label>
+                    {{ form.blood_group }}
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_height">Height (cm)</label>
+                    {{ form.height }}
+                </div>
+                <div class="form-group">
+                    <label for="id_weight">Weight (kg)</label>
+                    {{ form.weight }}
+                </div>
+            </div>
+            
+            <h3 class="section-title">Emergency Contact</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_emergency_contact_name">Emergency Contact Name</label>
+                    {{ form.emergency_contact_name }}
+                </div>
+                <div class="form-group">
+                    <label for="id_emergency_contact_phone">Emergency Contact Phone</label>
+                    {{ form.emergency_contact_phone }}
+                </div>
+            </div>
+            
+            <h3 class="section-title">Medical Information</h3>
+            
+            <div class="form-group">
+                <label for="id_medical_conditions">Medical Conditions</label>
+                {{ form.medical_conditions }}
+                <small style="color: #718096;">List any medical conditions you have</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_allergies">Allergies</label>
+                {{ form.allergies }}
+                <small style="color: #718096;">List any allergies you have</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_current_medications">Current Medications</label>
+                {{ form.current_medications }}
+                <small style="color: #718096;">List any medications you are currently taking</small>
+            </div>
+            
+            <button type="submit" class="btn-complete">
+                Complete Profile & Continue
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - AAHAARA 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .login-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .login-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+        text-align: left;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-login {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+    }
+    
+    .login-links {
+        text-align: center;
+    }
+    
+    .login-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .login-links a:hover {
+        text-decoration: underline;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    
+    .alert-danger {
+        background: #ffe6e6;
+        color: #cc0000;
+        border: 1px solid #ffcccc;
+    }
+    
+    .alert-success {
+        background: #e6f7e6;
+        color: #00aa00;
+        border: 1px solid #ccffcc;
+    }
+    
+    .user-type-info {
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .user-type-info h3 {
+        color: #2d3748;
+        margin-bottom: 10px;
+    }
+    
+    .user-type-info p {
+        color: #4a5568;
+        margin: 5px 0;
+    }
+    
+    .btn-login:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.btn-login');
+    
+    form.addEventListener('submit', function(e) {
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
+        
+        // Re-enable after 3 seconds if something goes wrong
+        setTimeout(function() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🔐 Login';
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <!-- Header -->
+        <div class="login-header">
+            <h1>🤖 AAHAARA Care Login</h1>
+            <p>Medical AI Assistant</p>
+        </div>
+        
+        <!-- User Type Info -->
+        <div class="user-type-info">
+            <h3>Login to Your Account</h3>
+            <p><strong>👨‍⚕️ Doctor/Dietitian:</strong> Manage patients, create diet charts, conduct consultations</p>
+            <p><strong>👤 Patient:</strong> Access chatbot, OCR, diet charts, book consultations</p>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Login Form -->
+        <form method="post" action="{% url 'user_management:custom_login' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn-login">
+                🔐 Login
+            </button>
+        </form>
+        
+        <!-- Links -->
+        <div class="login-links">
+            <p>Don't have an account? <a href="{% url 'user_management:register' %}">Register Here</a></p>
+            <p><a href="{% url 'user_management:home' %}">← Back to Home</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,5 @@
+Food Item,Meal Type,Calories (k),Carbs (g),Protein (g),Fat (g),Fibre (g),Category,Tags,Rasa,Virya,Vipaka,Guna,Vata Effect,Pitta Effect,Kapha Effect
+Test Rice,Lunch,150,30,3,1,2,Grains,healthy,Sweet,Neutral,Sweet,Light,Pacifies,Neutral,Aggravates
+Test Apple,Snack,50,12,0.3,0.2,2.4,Fruits,fresh,Sweet,Heating,Sweet,Light,Pacifies,Aggravates,Neutral
+Test Ginger,Spice,80,18,1.8,0.8,2,Spices,heating,Pungent,Heating,Pungent,Light,Aggravates,Pacifies,Pacifies
+

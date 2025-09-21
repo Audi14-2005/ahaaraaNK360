@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-user-md"></i> Doctor Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.medical_license.id_for_label }}" class="form-label">
+                            <i class="fas fa-certificate"></i> Medical License Number
+                        </label>
+                        {{ form.medical_license }}
+                        {% if form.medical_license.errors %}
+                            <div class="text-danger">
+                                {% for error in form.medical_license.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.specialization.id_for_label }}" class="form-label">
+                            <i class="fas fa-stethoscope"></i> Specialization
+                        </label>
+                        {{ form.specialization }}
+                        <div class="form-text">e.g., Cardiology, Neurology, Internal Medicine, etc.</div>
+                        {% if form.specialization.errors %}
+                            <div class="text-danger">
+                                {% for error in form.specialization.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.hospital_affiliation.id_for_label }}" class="form-label">
+                            <i class="fas fa-hospital"></i> Hospital/Clinic Affiliation
+                        </label>
+                        {{ form.hospital_affiliation }}
+                        {% if form.hospital_affiliation.errors %}
+                            <div class="text-danger">
+                                {% for error in form.hospital_affiliation.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}
+                            <div class="text-danger">
+                                {% for error in form.phone_number.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'medical_dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Profile Information -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Account Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Username:</strong><br>
+                        {{ user.username }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Email:</strong><br>
+                        {{ user.email }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Full Name:</strong><br>
+                        {{ user.get_full_name|default:"Not provided" }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Member Since:</strong><br>
+                        {{ user.date_joined|date:"F d, Y" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patients - Diet Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .search-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .patient-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+    
+    .patient-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .patient-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .patient-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+    
+    .analysis-status {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.completed {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .patient-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .info-item i {
+        color: #667eea;
+        width: 20px;
+    }
+    
+    .info-item span {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .patient-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 8px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-outline-primary {
+        border: 2px solid #667eea;
+        color: #667eea;
+        border-radius: 25px;
+        padding: 6px 18px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .pagination .page-link {
+        color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: #667eea;
+        border-color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>👥 Patient Management</h1>
+        <p>Manage your patients and their diet plans</p>
+    </div>
+    
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="row">
+            <div class="col-md-8">
+                <form method="GET" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" 
+                           placeholder="Search patients by name, Prakriti, or occupation..." 
+                           value="{{ search_query }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'diet_planner:create_patient' %}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Add New Patient
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patients List -->
+    {% if page_obj %}
+        {% for patient_data in page_obj %}
+        <div class="patient-card">
+            <div class="patient-header">
+                <h3 class="patient-name">{{ patient_data.name }}</h3>
+                <div class="analysis-status">
+                    {% if patient_data.prakriti_completed %}
+                        <span class="status-badge completed">✓ Prakriti</span>
+                    {% else %}
+                        <span class="status-badge pending">○ Prakriti</span>
+                    {% endif %}
+                    {% if patient_data.disease_completed %}
+                        <span class="status-badge completed">✓ Disease</span>
+                    {% else %}
+                        <span class="status-badge pending">○ Disease</span>
+                    {% endif %}
+                    {% if patient_data.health_completed %}
+                        <span class="status-badge completed">✓ Health</span>
+                    {% else %}
+                        <span class="status-badge pending">○ Health</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="patient-info">
+                <div class="info-item">
+                    <i class="fas fa-birthday-cake"></i>
+                    <span>Age: {{ patient_data.age }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-venus-mars"></i>
+                    <span>Gender: {{ patient_data.gender }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Email: {{ patient_data.email }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>Medical Conditions: {{ patient_data.medical_conditions|truncatechars:50 }}</span>
+                </div>
+            </div>
+            
+            <div class="patient-actions">
+                <a href="{% url 'diet_planner:patient_detail' patient_data.user_profile.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+                <a href="{% url 'diet_planner:generate_diet_chart' patient_data.user_profile.id %}" class="btn btn-primary">
+                    <i class="fas fa-magic"></i> Generate AI Chart
+                </a>
+                <a href="{% url 'user_management:prakriti_analysis_patient' patient_data.user_profile.id %}" class="btn btn-info">
+                    <i class="fas fa-leaf"></i> Analysis
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Patient pagination">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-user-plus"></i>
+            <h3>No Patients Found</h3>
+            {% if search_query %}
+                <p>No patients match your search criteria: "{{ search_query }}"</p>
+                <a href="{% url 'diet_planner:patient_list' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-list"></i> View All Patients
+                </a>
+            {% else %}
+                <p>Start by adding your first patient to create personalized diet plans.</p>
+                <a href="{% url 'diet_planner:create_patient' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add First Patient
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <!-- Quick Actions -->
+    <div class="text-center mt-4">
+        <a href="{% url 'diet_planner:dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'diet_planner:create_patient' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Add New Patient
+        </a>
+    </div>
+</div>
+{% endblock %}
+

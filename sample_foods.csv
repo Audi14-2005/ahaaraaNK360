@@ -1,0 +1,11 @@
+Food Item,Meal Type,Calories (k),Carbs (g),Protein (g),Fat (g),Fibre (g),Category,Tags,Rasa,Virya,Vipaka,Guna,Dosha Effect
+Biryani Rice with Chicken,Lunch,250,30,15,8,5,grains,spicy,sweet,heating,sweet,light,aggravates
+Apple,Snack,52,14,0.3,0.2,2.4,fruits,sweet,sweet,heating,sweet,light,pacifies
+Banana,Snack,89,23,1.1,0.3,2.6,fruits,sweet,sweet,heating,sweet,heavy,aggravates
+Brown Rice,Lunch,111,23,2.6,0.9,1.8,grains,healthy,sweet,heating,sweet,light,neutral
+Chicken Breast,Dinner,165,0,31,3.6,0,proteins,lean,sweet,heating,sweet,light,pacifies
+Spinach,Snack,23,3.6,2.9,0.4,2.2,vegetables,green,bitter,heating,sweet,light,pacifies
+Yogurt,Snack,59,3.6,10,0.4,0,proteins,probiotic,sour,heating,sweet,heavy,aggravates
+Almonds,Snack,579,22,21,50,12,nuts,healthy,sweet,heating,sweet,heavy,aggravates
+Green Tea,Beverage,2,0,0.2,0,0,beverages,antioxidant,bitter,heating,sweet,light,pacifies
+Ginger,Spice,80,18,1.8,0.8,2,spices,heating,pungent,heating,sweet,light,pacifies

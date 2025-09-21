@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patient Dashboard - AAHAARA Care{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+    
+    .card-content {
+        color: #718096;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    .btn-card {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        color: white;
+    }
+    
+    .btn-info {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+    }
+    
+    .btn-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .analysis-progress {
+        background: #f7fafc;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .progress-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        transition: width 0.3s ease;
+    }
+    
+    .status-completed {
+        color: #48bb78;
+        font-weight: 600;
+    }
+    
+    .status-pending {
+        color: #ed8936;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1>👤 Patient Dashboard</h1>
+        <p>Welcome back, {{ user_profile.user.get_full_name }}!</p>
+    </div>
+    
+    <!-- Dashboard Cards -->
+    <div class="dashboard-grid">
+        <!-- AAHAARA Care Chatbot -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    🤖
+                </div>
+                <div class="card-title">AAHAARA Care Chatbot</div>
+            </div>
+            <div class="card-content">
+                Get instant medical advice and clarification from our AI-powered medical assistant.
+            </div>
+            <a href="{% url 'aahaara_care:chat_dashboard' %}" class="btn-card btn-primary">
+                Start Chat
+            </a>
+        </div>
+        
+        <!-- Medical OCR -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                    📄
+                </div>
+                <div class="card-title">Medical OCR</div>
+            </div>
+            <div class="card-content">
+                Upload and analyze medical reports, prescriptions, and documents with AI.
+            </div>
+            <a href="{% url 'medical_dashboard' %}" class="btn-card btn-success">
+                Upload Documents
+            </a>
+        </div>
+        
+        <!-- Book Appointment -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);">
+                    📅
+                </div>
+                <div class="card-title">Book Appointment</div>
+            </div>
+            <div class="card-content">
+                Schedule a consultation with our qualified dietitians for personalized care.
+            </div>
+            <a href="{% url 'user_management:book_appointment' %}" class="btn-card btn-primary">
+                Book Now
+            </a>
+        </div>
+        
+        <!-- View Diet Charts -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    🍽️
+                </div>
+                <div class="card-title">My Diet Charts</div>
+            </div>
+            <div class="card-content">
+                View your personalized diet charts created by your dietitian.
+                {% if diet_charts %}
+                    <br><small style="color: #48bb78;">✓ You have {{ diet_charts|length }} diet chart{{ diet_charts|length|pluralize }} available</small>
+                {% else %}
+                    <br><small style="color: #ed8936;">No diet charts yet - book an appointment to get started!</small>
+                {% endif %}
+            </div>
+            <a href="{% url 'diet_planner:dashboard' %}" class="btn-card btn-success">
+                {% if diet_charts %}View My Charts{% else %}View Charts{% endif %}
+            </a>
+        </div>
+        
+        <!-- My Appointments -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+                    📋
+                </div>
+                <div class="card-title">My Appointments</div>
+            </div>
+            <div class="card-content">
+                View and manage your scheduled appointments with dietitians.
+                {% if recent_appointments %}
+                    <br><small style="color: #48bb78;">✓ You have {{ recent_appointments|length }} upcoming appointment{{ recent_appointments|length|pluralize }}</small>
+                {% else %}
+                    <br><small style="color: #ed8936;">No appointments scheduled</small>
+                {% endif %}
+            </div>
+            <a href="{% url 'user_management:appointment_list' %}" class="btn-card btn-info">
+                View Appointments
+            </a>
+        </div>
+    </div>
+    
+    <!-- My Diet Charts Section -->
+    {% if diet_charts %}
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 20px; color: #2d3748;">🍽️ My Diet Charts</h3>
+        {% for chart in diet_charts %}
+        <div style="border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>{{ chart.title }}</strong>
+                    <br>
+                    <small style="color: #718096;">{{ chart.description }}</small>
+                    <br>
+                    <small style="color: #4299e1;">Created: {{ chart.created_at|date:"M d, Y" }}</small>
+                </div>
+                <a href="{% url 'diet_planner:diet_chart_detail' chart.id %}" class="btn btn-sm btn-outline-primary">
+                    View Chart
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="{% url 'diet_planner:dashboard' %}" class="btn btn-primary">View All Charts</a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Recent Appointments -->
+    {% if recent_appointments %}
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 20px; color: #2d3748;">📅 Recent Appointments</h3>
+        {% for appointment in recent_appointments %}
+        <div style="border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>{{ appointment.dietitian.user.get_full_name }}</strong>
+                    <br>
+                    <small style="color: #718096;">{{ appointment.appointment_date|date:"M d, Y H:i" }}</small>
+                    <br>
+                    <small style="color: #4299e1;">{{ appointment.get_appointment_type_display }}</small>
+                </div>
+                <div style="text-align: right;">
+                    <span style="background: #e2e8f0; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem;">
+                        {{ appointment.get_status_display }}
+                    </span>
+                    <br>
+                    <small style="color: #718096;">{{ appointment.duration_minutes }} min</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="{% url 'user_management:appointment_list' %}" class="btn btn-primary">View All Appointments</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

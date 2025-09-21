@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Knowledge Base - AAHAARA Care{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .search-section {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .filter-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    .knowledge-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .knowledge-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .knowledge-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .knowledge-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+    
+    .category-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .knowledge-content {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+    
+    .knowledge-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #999;
+        font-size: 0.9rem;
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+    }
+    
+    .keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .keyword-tag {
+        background: #f8f9fa;
+        color: #666;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📚 Medical Knowledge Base</h1>
+        <p>Comprehensive medical information and guidelines</p>
+    </div>
+    
+    <!-- Search Section -->
+    <div class="search-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" 
+                       class="form-control" 
+                       name="search" 
+                       value="{{ search_query }}"
+                       placeholder="Search medical knowledge...">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h5>Filter by Category</h5>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'aahaara_care:knowledge_base' %}" 
+                       class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        All Categories
+                    </a>
+                    {% for category_value, category_label in categories %}
+                    <a href="{% url 'aahaara_care:knowledge_base' %}?category={{ category_value }}" 
+                       class="btn {% if selected_category == category_value %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                        {{ category_label }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Knowledge Items -->
+    {% if knowledge_items %}
+        {% for item in knowledge_items %}
+        <div class="knowledge-card">
+            <div class="knowledge-header">
+                <h4 class="knowledge-title">{{ item.title }}</h4>
+                <span class="category-badge">{{ item.get_category_display }}</span>
+            </div>
+            
+            <div class="knowledge-content">
+                {{ item.content|truncatewords:50|linebreaks }}
+            </div>
+            
+            <div class="knowledge-meta">
+                <div class="keywords">
+                    {% for keyword in item.keywords %}
+                    <span class="keyword-tag">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+                <div>
+                    <small>Updated {{ item.updated_at|date:"M d, Y" }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Pagination -->
+        {% if knowledge_items.has_other_pages %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if knowledge_items.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ knowledge_items.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in knowledge_items.paginator.page_range %}
+                {% if knowledge_items.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                {% if knowledge_items.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ knowledge_items.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <i class="fas fa-book"></i>
+            <h3>No Knowledge Items Found</h3>
+            <p>No medical knowledge items match your search criteria.</p>
+            {% if search_query %}
+            <a href="{% url 'aahaara_care:knowledge_base' %}" class="btn btn-primary">
+                <i class="fas fa-times"></i> Clear Search
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <!-- Quick Actions -->
+    <div class="text-center mt-4">
+        <a href="{% url 'aahaara_care:chat_dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'aahaara_care:create_new_session' %}" class="btn btn-primary">
+            <i class="fas fa-comments"></i> Ask AAHAARA Care
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Logged Out - AAHAARA 360{% endblock %}
+
+{% block extra_css %}
+<style>
+    .logout-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .logout-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+    }
+    
+    .logout-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .logout-header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .option-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .option-card:hover {
+        transform: translateY(-5px);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .option-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+    
+    .option-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #2d3748;
+    }
+    
+    .option-description {
+        color: #718096;
+        line-height: 1.6;
+    }
+    
+    .admin-card {
+        border-left: 4px solid #e53e3e;
+    }
+    
+    .doctor-card {
+        border-left: 4px solid #4299e1;
+    }
+    
+    .patient-card {
+        border-left: 4px solid #48bb78;
+    }
+    
+    .btn-home {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-home:hover {
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="logout-container">
+    <!-- Logout Header -->
+    <div class="logout-header">
+        <h1>👋 Logged Out</h1>
+        <p>You have been successfully logged out of AAHAARA 360</p>
+    </div>
+    
+    <!-- Login Options -->
+    <div class="options-grid">
+        <a href="{% url 'user_management:custom_login' %}" class="option-card doctor-card">
+            <div class="option-icon">👨‍⚕️</div>
+            <div class="option-title">Doctor Login</div>
+            <div class="option-description">Login as a dietitian to manage patients and create diet charts</div>
+        </a>
+        
+        <a href="{% url 'user_management:custom_login' %}" class="option-card patient-card">
+            <div class="option-icon">👤</div>
+            <div class="option-title">Patient Login</div>
+            <div class="option-description">Login as a patient to book appointments and view your diet charts</div>
+        </a>
+    </div>
+    
+    <!-- Home Button -->
+    <a href="{% url 'user_management:home' %}" class="btn-home">
+        🏠 Return to Home
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,5 @@
+Food Item,Meal Type,Calories (k),Carbs (g),Protein (g),Fat (g),Fibre (g),Category,Tags,Rasa,Virya,Vipaka,Guna,Dosha Effect
+Test Rice,Lunch,150,30,3,1,2,Grains,healthy,Sweet,Neutral,Sweet,Light,Neutral
+Test Apple,Snack,50,12,0.3,0.2,2.4,Fruits,fresh,Sweet,Heating,Sweet,Light,Pacifies
+Test Rice,Lunch,200,40,5,2,3,Grains,organic,Sweet,Neutral,Sweet,Light,Neutral
+

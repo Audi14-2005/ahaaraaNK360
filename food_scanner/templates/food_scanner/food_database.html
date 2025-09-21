@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Food Database - Food Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .food-table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
+    
+    .food-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    
+    .food-table th,
+    .food-table td {
+        padding: 12px 15px;
+        text-align: left;
+        vertical-align: middle;
+    }
+    
+    .food-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .food-table tbody tr {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .food-table tbody tr:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .food-table td {
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .food-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .food-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    
+    .no-foods-message {
+        text-align: center;
+        padding: 50px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        color: #6c757d;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn-action {
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-database"></i> Food Database</h1>
+        <p>Explore a comprehensive list of food items with their nutritional and Ayurvedic properties</p>
+        <div class="mt-3">
+            <a href="{% url 'food_scanner:import_foods_csv' %}" class="btn btn-light me-2">
+                <i class="fas fa-upload"></i> Import Foods CSV
+            </a>
+            <a href="{% url 'food_scanner:scan_food' %}" class="btn btn-outline-light">
+                <i class="fas fa-camera"></i> Scan Food
+            </a>
+        </div>
+    </div>
+
+    <div class="food-table-container">
+        {% if foods %}
+        <table class="food-table">
+            <thead>
+                <tr>
+                    <th>Food</th>
+                    <th>Calories</th>
+                    <th>Protein</th>
+                    <th>Carbs</th>
+                    <th>Fat</th>
+                    <th>Rasa</th>
+                    <th>Virya</th>
+                    <th>Vipaka</th>
+                    <th>Vata</th>
+                    <th>Pitta</th>
+                    <th>Kapha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for food in foods %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            {% if food.image_url %}
+                                <img src="{{ food.image_url }}" alt="{{ food.name }}" class="food-image">
+                            {% else %}
+                                <div class="food-image" style="background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-utensils" style="color: #6c757d;"></i>
+                                </div>
+                            {% endif %}
+                            <span>{{ food.name }}</span>
+                        </div>
+                    </td>
+                    <td>{{ food.calories|floatformat:1 }} kcal</td>
+                    <td>{{ food.protein|floatformat:1 }} g</td>
+                    <td>{{ food.carbohydrates|floatformat:1 }} g</td>
+                    <td>{{ food.fat|floatformat:1 }} g</td>
+                    <td>{{ food.primary_taste|title }}</td>
+                    <td>{{ food.energy|title }}</td>
+                    <td>{{ food.vipaka|title }}</td>
+                    <td>{{ food.get_vata_effect_display }}</td>
+                    <td>{{ food.get_pitta_effect_display }}</td>
+                    <td>{{ food.get_kapha_effect_display }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-foods-message">
+            <i class="fas fa-database" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;"></i>
+            <h3>No food items found</h3>
+            <p>No food items are currently in the database. You can add them manually or import a CSV file.</p>
+            <div class="action-buttons">
+                <a href="{% url 'diet_planner:import_custom_foods_csv' %}" class="btn-action btn-primary">
+                    <i class="fas fa-file-csv me-2"></i>Import Foods CSV
+                </a>
+                <a href="{% url 'food_scanner:scan_food' %}" class="btn-action btn-secondary">
+                    <i class="fas fa-camera me-2"></i>Scan Food
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

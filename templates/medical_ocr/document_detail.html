@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ document.patient_name }} - Document Analysis{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-file-medical"></i> {{ document.patient_name }}</h2>
+                <p class="text-muted mb-0">{{ document.get_document_type_display }} - {{ document.created_at|date:"F d, Y" }}</p>
+            </div>
+            <div>
+                {% if document.processing_status == 'failed' %}
+                    <a href="{% url 'reprocess_document' document.id %}" class="btn btn-warning">
+                        <i class="fas fa-redo"></i> Reprocess
+                    </a>
+                {% endif %}
+                <a href="{% url 'document_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Alert -->
+{% if document.processing_status == 'processing' %}
+    <div class="alert alert-info">
+        <i class="fas fa-spinner fa-spin"></i> Document is being processed. This may take a few minutes.
+    </div>
+{% elif document.processing_status == 'failed' %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i> Document processing failed. Please try reprocessing.
+    </div>
+{% endif %}
+
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        {% if document.processing_status == 'completed' %}
+            <!-- AI Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-robot"></i> AI Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light">
+                        <i class="fas fa-quote-left"></i> {{ document.ai_summary }}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-brain"></i> Confidence Score: {{ document.confidence_score|floatformat:2 }}%
+                        </small>
+                        <span class="badge bg-primary">AI Generated</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Extracted Information -->
+            <div class="row">
+                {% if document.medications %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-pills"></i> Medications</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for med in document.medications %}
+                                    <div class="alert alert-info mb-2">
+                                        <i class="fas fa-capsules"></i> {{ med.name }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if document.vital_signs %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-heartbeat"></i> Vital Signs</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for key, value in document.vital_signs.items %}
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-capitalize">{{ key|title }}:</span>
+                                        <strong>{{ value.value }}</strong>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if document.diagnosis %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-stethoscope"></i> Diagnosis</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for diag in document.diagnosis %}
+                                    <div class="alert alert-warning mb-2">
+                                        <i class="fas fa-clipboard-list"></i> {{ diag.condition }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if document.key_findings %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-search"></i> Key Findings</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for finding in document.key_findings %}
+                                    <div class="alert alert-light mb-2">
+                                        <i class="fas fa-bullseye"></i> {{ finding }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Recommendations -->
+            {% if document.recommendations %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6><i class="fas fa-lightbulb"></i> Recommendations</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> {{ document.recommendations }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Analysis Details -->
+            {% if analysis %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6><i class="fas fa-chart-line"></i> Analysis Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-{% if analysis.urgency_level == 'critical' %}danger{% elif analysis.urgency_level == 'high' %}warning{% elif analysis.urgency_level == 'medium' %}info{% else %}success{% endif %}">
+                                        {{ analysis.get_urgency_level_display }}
+                                    </h5>
+                                    <small class="text-muted">Urgency Level</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-{% if analysis.follow_up_required %}warning{% else %}success{% endif %}">
+                                        <i class="fas fa-{% if analysis.follow_up_required %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+                                    </h5>
+                                    <small class="text-muted">Follow-up Required</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-info">{{ analysis.created_at|date:"M d" }}</h5>
+                                    <small class="text-muted">Analyzed</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Processing Status -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    {% if document.processing_status == 'uploaded' %}
+                        <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                        <h4>Document Uploaded</h4>
+                        <p class="text-muted">Your document has been uploaded and is waiting to be processed.</p>
+                    {% elif document.processing_status == 'processing' %}
+                        <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                        <h4>Processing Document</h4>
+                        <p class="text-muted">Our AI is analyzing your document. This may take a few minutes.</p>
+                        <div class="progress mt-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                        </div>
+                    {% elif document.processing_status == 'failed' %}
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                        <h4>Processing Failed</h4>
+                        <p class="text-muted">There was an error processing your document. Please try again.</p>
+                        <a href="{% url 'reprocess_document' document.id %}" class="btn btn-warning">
+                            <i class="fas fa-redo"></i> Try Again
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Document Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Document Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Patient:</strong><br>
+                    {{ document.patient_name }}
+                </div>
+                {% if document.patient_id %}
+                    <div class="mb-3">
+                        <strong>Patient ID:</strong><br>
+                        {{ document.patient_id }}
+                    </div>
+                {% endif %}
+                <div class="mb-3">
+                    <strong>Document Type:</strong><br>
+                    <span class="badge bg-secondary">{{ document.get_document_type_display }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong><br>
+                    {% if document.processing_status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% elif document.processing_status == 'processing' %}
+                        <span class="badge bg-warning">Processing</span>
+                    {% elif document.processing_status == 'failed' %}
+                        <span class="badge bg-danger">Failed</span>
+                    {% else %}
+                        <span class="badge bg-info">Uploaded</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <strong>Uploaded:</strong><br>
+                    {{ document.created_at|date:"F d, Y H:i" }}
+                </div>
+                {% if document.processing_status == 'completed' %}
+                    <div class="mb-3">
+                        <strong>Confidence Score:</strong><br>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ document.confidence_score }}%">
+                                {{ document.confidence_score|floatformat:1 }}%
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-tools"></i> Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if document.processing_status == 'completed' %}
+                        <button class="btn btn-outline-primary" onclick="downloadSummary()">
+                            <i class="fas fa-download"></i> Download Summary
+                        </button>
+                        <button class="btn btn-outline-info" onclick="shareSummary()">
+                            <i class="fas fa-share"></i> Share Summary
+                        </button>
+                    {% endif %}
+                    {% if document.processing_status == 'failed' %}
+                        <a href="{% url 'reprocess_document' document.id %}" class="btn btn-warning">
+                            <i class="fas fa-redo"></i> Reprocess
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'upload_document' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Upload Another
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if document.processing_status == 'completed' %}
+    <!-- Extracted Text (Collapsible) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6>
+                        <a class="text-decoration-none" data-bs-toggle="collapse" href="#extractedText" role="button">
+                            <i class="fas fa-file-alt"></i> Extracted Text
+                            <i class="fas fa-chevron-down float-end"></i>
+                        </a>
+                    </h6>
+                </div>
+                <div class="collapse" id="extractedText">
+                    <div class="card-body">
+                        <div class="bg-light p-3 rounded">
+                            <pre style="white-space: pre-wrap; font-family: inherit;">{{ document.extracted_text }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<script>
+function downloadSummary() {
+    const summary = `Medical Document Summary\n\nPatient: {{ document.patient_name }}\nDocument Type: {{ document.get_document_type_display }}\nDate: {{ document.created_at|date:"F d, Y" }}\n\nAI Summary:\n{{ document.ai_summary }}\n\nMedications:\n{% for med in document.medications %}- {{ med.name }}\n{% endfor %}\n\nVital Signs:\n{% for key, value in document.vital_signs.items %}{{ key|title }}: {{ value.value }}\n{% endfor %}\n\nDiagnosis:\n{% for diag in document.diagnosis %}- {{ diag.condition }}\n{% endfor %}`;
+    
+    const blob = new Blob([summary], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '{{ document.patient_name }}_summary.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function shareSummary() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Medical Document Summary',
+            text: '{{ document.ai_summary }}',
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText('{{ document.ai_summary }}').then(() => {
+            alert('Summary copied to clipboard!');
+        });
+    }
+}
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Document - {{ document.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+    
+    .current-file {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .file-icon {
+        font-size: 1.5rem;
+        color: #667eea;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+    
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="form-card">
+        <h2 class="mb-4">
+            <i class="fas fa-edit"></i> Edit Document
+        </h2>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Note:</strong> If you upload a new file, the document will be reprocessed automatically with OCR and AI analysis.
+        </div>
+        
+        <!-- Current File Info -->
+        {% if document.original_file %}
+        <div class="current-file">
+            <h5><i class="fas fa-file"></i> Current File</h5>
+            <div class="file-info">
+                <span class="file-icon">
+                    {% if document.original_file.name|slice:"-4:" == ".pdf" %}
+                        <i class="fas fa-file-pdf"></i>
+                    {% elif document.original_file.name|slice:"-4:" == ".jpg" or document.original_file.name|slice:"-5:" == ".jpeg" or document.original_file.name|slice:"-4:" == ".png" %}
+                        <i class="fas fa-file-image"></i>
+                    {% else %}
+                        <i class="fas fa-file"></i>
+                    {% endif %}
+                </span>
+                <div>
+                    <strong>{{ document.original_file.name|slice:"13:" }}</strong><br>
+                    <small class="text-muted">
+                        Uploaded: {{ document.created_at|date:"M d, Y H:i" }} | 
+                        Status: 
+                        {% if document.processing_status == 'completed' %}
+                            <span class="badge bg-success">{{ document.get_processing_status_display }}</span>
+                        {% elif document.processing_status == 'failed' %}
+                            <span class="badge bg-danger">{{ document.get_processing_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-warning">{{ document.get_processing_status_display }}</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.title.id_for_label }}">
+                    <i class="fas fa-heading"></i> Document Title
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-danger">{{ form.title.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.document_type.id_for_label }}">
+                    <i class="fas fa-tags"></i> Document Type
+                </label>
+                {{ form.document_type }}
+                {% if form.document_type.errors %}
+                    <div class="text-danger">{{ form.document_type.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.patient_name.id_for_label }}">
+                    <i class="fas fa-user"></i> Patient Name
+                </label>
+                {{ form.patient_name }}
+                {% if form.patient_name.errors %}
+                    <div class="text-danger">{{ form.patient_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.patient_id.id_for_label }}">
+                    <i class="fas fa-id-card"></i> Patient ID
+                </label>
+                {{ form.patient_id }}
+                {% if form.patient_id.errors %}
+                    <div class="text-danger">{{ form.patient_id.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.original_file.id_for_label }}">
+                    <i class="fas fa-upload"></i> Upload New File (Optional)
+                </label>
+                {{ form.original_file }}
+                {% if form.original_file.errors %}
+                    <div class="text-danger">{{ form.original_file.errors.0 }}</div>
+                {% endif %}
+                <small class="text-muted">
+                    Leave empty to keep the current file. Supported formats: PDF, JPG, PNG, JPEG
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="{{ form.notes.id_for_label }}">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="text-danger">{{ form.notes.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Document
+                    </button>
+                    <a href="{% url 'document_detail' document_id=document.id %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+                
+                <div>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash"></i> Delete Document
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-danger"></i> Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this document?</p>
+                <p><strong>This action cannot be undone.</strong></p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-warning"></i>
+                    This will permanently delete:
+                    <ul class="mb-0 mt-2">
+                        <li>The document file</li>
+                        <li>All extracted text and AI analysis</li>
+                        <li>All associated data</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteDocument()">
+                    <i class="fas fa-trash"></i> Delete Document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+function deleteDocument() {
+    const documentId = '{{ document.id }}';
+    
+    fetch(`/medical/document/${documentId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.innerHTML = `
+                <i class="fas fa-check-circle"></i> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.edit-container').insertBefore(alert, document.querySelector('.form-card'));
+            
+            // Redirect to document list after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/medical/documents/';
+            }, 2000);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the document.');
+    });
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+    modal.hide();
+}
+</script>
+{% endblock %}

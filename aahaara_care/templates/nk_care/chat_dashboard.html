@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AAHAARA Care - Medical AI Assistant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .welcome-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .welcome-card h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    
+    .welcome-card p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .action-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #667eea;
+    }
+    
+    .action-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .action-description {
+        color: #666;
+        margin-bottom: 20px;
+    }
+    
+    .recent-sessions {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .session-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .session-item:last-child {
+        border-bottom: none;
+    }
+    
+    .session-info h5 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .session-info small {
+        color: #666;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-outline-primary {
+        border: 2px solid #667eea;
+        color: #667eea;
+        border-radius: 25px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Welcome Section -->
+    <div class="welcome-card">
+        <h1>🤖 AAHAARA Care</h1>
+        <p>Your Advanced Medical AI Assistant - Created by NK</p>
+        <p>Get instant medical insights, clarification, and evidence-based information</p>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_sessions }}</div>
+            <div class="stat-label">Chat Sessions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_messages }}</div>
+            <div class="stat-label">Total Messages</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Available</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">AI</div>
+            <div class="stat-label">Powered by Gemini</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="action-card" onclick="location.href='{% url 'aahaara_care:chat_session' active_session.id %}'">
+            <div class="action-icon">💬</div>
+            <div class="action-title">Continue Chat</div>
+            <div class="action-description">Resume your current conversation with AAHAARA Care</div>
+            <button class="btn btn-primary">Start Chatting</button>
+        </div>
+        
+        <div class="action-card" onclick="location.href='{% url 'aahaara_care:create_new_session' %}'">
+            <div class="action-icon">🆕</div>
+            <div class="action-title">New Session</div>
+            <div class="action-description">Start a fresh conversation with AAHAARA Care</div>
+            <button class="btn btn-outline-primary">New Chat</button>
+        </div>
+        
+        <div class="action-card" onclick="location.href='{% url 'aahaara_care:knowledge_base' %}'">
+            <div class="action-icon">📚</div>
+            <div class="action-title">Knowledge Base</div>
+            <div class="action-description">Browse medical information and guidelines</div>
+            <button class="btn btn-outline-primary">Explore</button>
+        </div>
+        
+        <div class="action-card" onclick="location.href='{% url 'aahaara_care:session_list' %}'">
+            <div class="action-icon">📋</div>
+            <div class="action-title">Chat History</div>
+            <div class="action-description">View all your previous conversations</div>
+            <button class="btn btn-outline-primary">View History</button>
+        </div>
+    </div>
+    
+    <!-- Recent Sessions -->
+    {% if recent_sessions %}
+    <div class="recent-sessions">
+        <h3>Recent Chat Sessions</h3>
+        {% for session in recent_sessions %}
+        <div class="session-item">
+            <div class="session-info">
+                <h5>{{ session.title|default:"Untitled Session" }}</h5>
+                <small>{{ session.updated_at|date:"M d, Y H:i" }} • {{ session.messages.count }} messages</small>
+            </div>
+            <a href="{% url 'aahaara_care:chat_session' session.id %}" class="btn btn-outline-primary btn-sm">
+                Open
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Features Section -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center mb-4">AAHAARA Care Features</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-brain fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">AI-Powered Insights</h5>
+                    <p class="card-text">Get intelligent medical insights powered by NK care, trained on medical knowledge and best practices.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Safety First</h5>
+                    <p class="card-text">Built with medical safety guidelines, always recommending professional consultation for serious conditions.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-clock fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">24/7 Availability</h5>
+                    <p class="card-text">Access AAHAARA Care anytime, anywhere. Get instant responses to your medical questions and clarifications.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add some interactive animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat cards on load
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}
+
+

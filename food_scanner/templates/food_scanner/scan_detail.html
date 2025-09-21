@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ food_scan.detected_food }} - Food Analysis{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .page-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .nutritional-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nutritional-card h3 {
+        color: #2d3748;
+        margin-bottom: 25px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+    }
+    
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .nutrition-item {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .nutrition-item:hover {
+        transform: translateY(-5px);
+        border-color: #667eea;
+    }
+    
+    .nutrition-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 5px;
+    }
+    
+    .nutrition-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .nutrition-unit {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-left: 2px;
+    }
+    
+    .ayurvedic-card {
+        background: linear-gradient(135deg, #ffa726, #ff7043);
+        color: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(255, 167, 38, 0.3);
+    }
+    
+    .ayurvedic-card h3 {
+        color: white;
+        margin-bottom: 25px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .ayurvedic-symbol {
+        font-size: 2rem;
+        color: #8e24aa;
+    }
+    
+    .dosha-effects {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        justify-content: center;
+    }
+    
+    .dosha-pill {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .dosha-vata {
+        background: #8e24aa;
+        color: white;
+    }
+    
+    .dosha-pitta {
+        background: #ff7043;
+        color: white;
+    }
+    
+    .dosha-kapha {
+        background: #66bb6a;
+        color: white;
+    }
+    
+    .ayurvedic-properties {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .property-item {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+    }
+    
+    .property-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        opacity: 0.9;
+    }
+    
+    .property-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+    
+    .property-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: center;
+        margin-top: 8px;
+    }
+    
+    .property-tag {
+        background: rgba(255, 255, 255, 0.3);
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .description-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .description-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        opacity: 0.95;
+    }
+    
+    .image-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .scan-image {
+        width: 100%;
+        max-width: 500px;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 20px;
+    }
+    
+    .scan-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .info-item {
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .info-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+    
+    .info-value {
+        font-size: 1.1rem;
+        color: #2d3748;
+        font-weight: 700;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn-action {
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-processing {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-failed {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    @media (max-width: 768px) {
+        .analysis-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .nutrition-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .ayurvedic-properties {
+            grid-template-columns: 1fr;
+        }
+        
+        .dosha-effects {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>{{ food_scan.detected_food|default:"Food Analysis" }}</h1>
+        <p>Detailed nutritional and Ayurvedic analysis</p>
+    </div>
+    
+    <!-- Image Section -->
+    <div class="image-section">
+        <img src="{{ food_scan.image.url }}" alt="{{ food_scan.detected_food }}" class="scan-image">
+        
+        <div class="scan-info">
+            <div class="info-item">
+                <div class="info-label">Confidence</div>
+                <div class="info-value">{{ food_scan.confidence_score|floatformat:1 }}%</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Status</div>
+                <div class="info-value">
+                    <span class="status-badge status-{{ food_scan.status }}">
+                        {{ food_scan.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Scan Date</div>
+                <div class="info-value">{{ food_scan.created_at|date:"M d, Y H:i" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Scan Type</div>
+                <div class="info-value">{{ food_scan.get_scan_type_display }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis Grid -->
+    <div class="analysis-grid">
+        <!-- Nutritional Information -->
+        <div class="nutritional-card">
+            <h3>Nutritional Information (per 100g)</h3>
+            
+            <div class="nutrition-grid">
+                <div class="nutrition-item">
+                    <div class="nutrition-value">{{ food_scan.calories|floatformat:0 }}<span class="nutrition-unit">cal</span></div>
+                    <div class="nutrition-label">Calories</div>
+                </div>
+                
+                <div class="nutrition-item">
+                    <div class="nutrition-value">{{ food_scan.carbohydrates|floatformat:1 }}<span class="nutrition-unit">g</span></div>
+                    <div class="nutrition-label">Carbs</div>
+                </div>
+                
+                <div class="nutrition-item">
+                    <div class="nutrition-value">{{ food_scan.protein|floatformat:1 }}<span class="nutrition-unit">g</span></div>
+                    <div class="nutrition-label">Protein</div>
+                </div>
+                
+                <div class="nutrition-item">
+                    <div class="nutrition-value">{{ food_scan.fat|floatformat:1 }}<span class="nutrition-unit">g</span></div>
+                    <div class="nutrition-label">Fat</div>
+                </div>
+                
+                <div class="nutrition-item">
+                    <div class="nutrition-value">{{ food_scan.fiber|floatformat:1 }}<span class="nutrition-unit">g</span></div>
+                    <div class="nutrition-label">Fiber</div>
+                </div>
+                
+                <div class="nutrition-item">
+                    <div class="nutrition-value">{{ food_scan.sugar|floatformat:1 }}<span class="nutrition-unit">g</span></div>
+                    <div class="nutrition-label">Sugar</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ayurvedic Properties -->
+        <div class="ayurvedic-card">
+            <h3>
+                <span class="ayurvedic-symbol">ॐ</span>
+                Ayurvedic Properties
+            </h3>
+            
+            <!-- Dosha Effects -->
+            <div class="dosha-effects">
+                <div class="dosha-pill dosha-vata">
+                    VATA: {{ food_scan.get_vata_effect_display|upper }}
+                </div>
+                <div class="dosha-pill dosha-pitta">
+                    PITTA: {{ food_scan.get_pitta_effect_display|upper }}
+                </div>
+                <div class="dosha-pill dosha-kapha">
+                    KAPHA: {{ food_scan.get_kapha_effect_display|upper }}
+                </div>
+            </div>
+            
+            <!-- Ayurvedic Attributes -->
+            <div class="ayurvedic-properties">
+                <div class="property-item">
+                    <div class="property-label">Rasa (Taste)</div>
+                    <div class="property-value">{{ food_scan.rasa|title|default:"Unknown" }}</div>
+                    {% if food_scan.rasa %}
+                        <div class="property-tags">
+                            <span class="property-tag">{{ food_scan.rasa|title }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="property-item">
+                    <div class="property-label">Virya (Energy)</div>
+                    <div class="property-value">{{ food_scan.virya|title|default:"Unknown" }}</div>
+                </div>
+                
+                <div class="property-item">
+                    <div class="property-label">Vipaka (Post-digestive)</div>
+                    <div class="property-value">{{ food_scan.vipaka|title|default:"Unknown" }}</div>
+                </div>
+                
+                <div class="property-item">
+                    <div class="property-label">Guna (Qualities)</div>
+                    <div class="property-value">{{ food_scan.guna|title|default:"Unknown" }}</div>
+                    {% if food_scan.guna %}
+                        <div class="property-tags">
+                            <span class="property-tag">{{ food_scan.guna|title }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Description -->
+            {% if food_scan.ayurvedic_description %}
+            <div class="description-section">
+                <div class="description-text">
+                    {{ food_scan.ayurvedic_description }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Additional Information -->
+    {% if food_scan.recommendations or food_scan.warnings %}
+    <div class="row mt-4">
+        {% if food_scan.recommendations %}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ food_scan.recommendations }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if food_scan.warnings %}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Warnings</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ food_scan.warnings }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'food_scanner:scan_food' %}" class="btn-action btn-primary">
+            <i class="fas fa-camera me-2"></i>Scan Another Food
+        </a>
+        <a href="{% url 'food_scanner:scan_list' %}" class="btn-action btn-secondary">
+            <i class="fas fa-list me-2"></i>View All Scans
+        </a>
+        <a href="{% url 'food_scanner:delete_scan' food_scan.id %}" class="btn-action btn-danger" 
+           onclick="return confirm('Are you sure you want to delete this scan?')">
+            <i class="fas fa-trash me-2"></i>Delete Scan
+        </a>
+    </div>
+</div>
+{% endblock %}

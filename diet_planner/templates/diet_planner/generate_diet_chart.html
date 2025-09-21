@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Generate Diet Chart - {{ patient.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .generation-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 25px 30px;
+        text-align: center;
+    }
+    
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+    
+    .card-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .card-body {
+        padding: 30px;
+    }
+    
+    .patient-summary {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .summary-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+    
+    .summary-label {
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .summary-value {
+        color: #333;
+        font-weight: 600;
+    }
+    
+    /* Form Styling */
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .ai-info {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .ai-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1565c0;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .ai-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    
+    .ai-feature {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1565c0;
+    }
+    
+    .ai-feature i {
+        color: #2196f3;
+    }
+    
+    .generation-form {
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .loading-state {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    
+    .loading-subtext {
+        color: #999;
+        font-size: 0.9rem;
+    }
+    
+    .alert-info {
+        background-color: #e3f2fd;
+        border-color: #bbdefb;
+        color: #1565c0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-info i {
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>🤖 AI Diet Chart Generation</h1>
+        <p>Create a personalized diet plan for {{ patient.name }} using our advanced AI system</p>
+    </div>
+    
+    <!-- Generation Card -->
+    <div class="generation-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-magic"></i> The Architect AI
+            </h2>
+            <p class="card-subtitle">Rule-based expert system for initial diet chart generation</p>
+        </div>
+        
+        <div class="card-body">
+            <!-- Patient Summary -->
+            <div class="patient-summary">
+                <h3 class="summary-title">
+                    <i class="fas fa-user"></i> Patient Summary
+                </h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="summary-label">Name</span>
+                        <span class="summary-value">{{ patient.name }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Age</span>
+                        <span class="summary-value">{{ patient.age }} years</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Prakriti</span>
+                        <span class="summary-value">{{ patient.get_prakriti_display }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">BMI</span>
+                        <span class="summary-value">{{ patient.get_bmi|floatformat:1 }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Daily Calories</span>
+                        <span class="summary-value">{{ patient.get_daily_calorie_needs }} cal</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Activity Level</span>
+                        <span class="summary-value">{{ patient.get_activity_level_display }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Primary Goal</span>
+                        <span class="summary-value">{{ patient.primary_goal|title }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Allergies</span>
+                        <span class="summary-value">
+                            {% if patient.allergies %}
+                                {{ patient.allergies|join:", " }}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Patient Data Update Form -->
+            {% if show_update_form %}
+            <div class="update-form-section" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #856404; margin-bottom: 15px;">
+                    <i class="fas fa-edit"></i> Complete Patient Information
+                </h3>
+                <p style="color: #856404; margin-bottom: 20px;">
+                    Please provide the missing patient information to generate a personalized diet chart.
+                </p>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Display form errors -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h6 style="margin: 0 0 10px 0; font-weight: 600;">Please correct the following errors:</h6>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field|title }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.age.id_for_label }}" class="form-label">Age *</label>
+                                {{ form.age }}
+                                {% if form.age.errors %}
+                                    <div class="text-danger" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">{{ form.age.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.height.id_for_label }}" class="form-label">Height (cm) *</label>
+                                {{ form.height }}
+                                {% if form.height.errors %}
+                                    <div class="text-danger" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">{{ form.height.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.weight.id_for_label }}" class="form-label">Weight (kg) *</label>
+                                {{ form.weight }}
+                                {% if form.weight.errors %}
+                                    <div class="text-danger" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">{{ form.weight.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions" style="text-align: center; margin-top: 20px;">
+                        <button type="submit" name="update_patient" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Update Patient Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            <!-- AI Information -->
+            <div class="ai-info">
+                <h3 class="ai-title">
+                    <i class="fas fa-robot"></i> AI Generation Process
+                </h3>
+                <div class="ai-features">
+                    <div class="ai-feature">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculate daily calorie needs using Harris-Benedict formula</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter foods based on Prakriti (constitution)</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Exclude allergenic foods and respect dietary preferences</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>Generate 7-day meal plan with proper nutritional distribution</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-leaf"></i>
+                        <span>Apply Ayurvedic principles for optimal food selection</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-clock"></i>
+                        <span>Optimize meal timing based on Ayurvedic recommendations</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generation Form -->
+            <div class="generation-form">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Ready to Generate:</strong> The AI will create a comprehensive 7-day diet chart based on {{ patient.name }}'s profile. This process typically takes 10-30 seconds.
+                </div>
+                
+                <form method="post" id="generationForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <i class="fas fa-magic"></i> Generate AI Diet Chart
+                    </button>
+                </form>
+                
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState">
+                    <div class="spinner"></div>
+                    <div class="loading-text">AI is generating your diet chart...</div>
+                    <div class="loading-subtext">This may take a few moments. Please don't close this page.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back Button -->
+    <div class="text-center">
+        <a href="{% url 'diet_planner:patient_detail' patient.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Patient Profile
+        </a>
+    </div>
+</div>
+
+<script>
+document.getElementById('generationForm').addEventListener('submit', function(e) {
+    // Show loading state
+    document.getElementById('generateBtn').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+    
+    // Disable form to prevent double submission
+    this.style.pointerEvents = 'none';
+});
+</script>
+{% endblock %}
+
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.height.id_for_label }}" class="form-label">Height (cm) *</label>
+                                {{ form.height }}
+                                {% if form.height.errors %}
+                                    <div class="text-danger" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">{{ form.height.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="{{ form.weight.id_for_label }}" class="form-label">Weight (kg) *</label>
+                                {{ form.weight }}
+                                {% if form.weight.errors %}
+                                    <div class="text-danger" style="color: #dc3545; font-size: 0.875rem; margin-top: 5px;">{{ form.weight.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions" style="text-align: center; margin-top: 20px;">
+                        <button type="submit" name="update_patient" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Update Patient Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+            
+            <!-- AI Information -->
+            <div class="ai-info">
+                <h3 class="ai-title">
+                    <i class="fas fa-robot"></i> AI Generation Process
+                </h3>
+                <div class="ai-features">
+                    <div class="ai-feature">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculate daily calorie needs using Harris-Benedict formula</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter foods based on Prakriti (constitution)</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Exclude allergenic foods and respect dietary preferences</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>Generate 7-day meal plan with proper nutritional distribution</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-leaf"></i>
+                        <span>Apply Ayurvedic principles for optimal food selection</span>
+                    </div>
+                    <div class="ai-feature">
+                        <i class="fas fa-clock"></i>
+                        <span>Optimize meal timing based on Ayurvedic recommendations</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generation Form -->
+            <div class="generation-form">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Ready to Generate:</strong> The AI will create a comprehensive 7-day diet chart based on {{ patient.name }}'s profile. This process typically takes 10-30 seconds.
+                </div>
+                
+                <form method="post" id="generationForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <i class="fas fa-magic"></i> Generate AI Diet Chart
+                    </button>
+                </form>
+                
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState">
+                    <div class="spinner"></div>
+                    <div class="loading-text">AI is generating your diet chart...</div>
+                    <div class="loading-subtext">This may take a few moments. Please don't close this page.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back Button -->
+    <div class="text-center">
+        <a href="{% url 'diet_planner:patient_detail' patient.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Patient Profile
+        </a>
+    </div>
+</div>
+
+<script>
+document.getElementById('generationForm').addEventListener('submit', function(e) {
+    // Show loading state
+    document.getElementById('generateBtn').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+    
+    // Disable form to prevent double submission
+    this.style.pointerEvents = 'none';
+});
+</script>
+{% endblock %}

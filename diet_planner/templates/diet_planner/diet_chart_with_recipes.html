@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ chart.title }} - With Recipes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .chart-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .chart-meta {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-radius: 25px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .meal-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .meal-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .food-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .food-item {
+        background: #f7fafc;
+        border-radius: 12px;
+        padding: 20px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .food-item:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+    }
+    
+    .food-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 8px;
+    }
+    
+    .food-quantity {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .food-nutrition {
+        font-size: 0.9rem;
+        color: #718096;
+        margin-bottom: 15px;
+    }
+    
+    .recipe-links {
+        margin-top: 15px;
+    }
+    
+    .recipe-link {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-right: 10px;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .recipe-link:hover {
+        background: #5a67d8;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+    
+    .no-recipes {
+        color: #a0aec0;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+    
+    .back-button {
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 12px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .back-button:hover {
+        background: #cbd5e0;
+        color: #2d3748;
+        text-decoration: none;
+    }
+    
+    .patient-info {
+        background: #f0fff4;
+        border-left: 4px solid #48bb78;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .patient-info h3 {
+        color: #2f855a;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .patient-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .patient-detail {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .patient-detail-label {
+        font-size: 0.8rem;
+        color: #718096;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .patient-detail-value {
+        font-size: 1.1rem;
+        color: #2d3748;
+        font-weight: 600;
+    }
+    
+    .meal-icon {
+        width: 30px;
+        height: 30px;
+        background: #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .chart-meta {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .food-items {
+            grid-template-columns: 1fr;
+        }
+        
+        .patient-details {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'diet_planner:diet_chart_detail' chart.id %}" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Diet Chart
+    </a>
+    
+    <!-- Chart Header -->
+    <div class="chart-header">
+        <h1>{{ chart.title }}</h1>
+        {% if chart.description %}
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 0;">{{ chart.description }}</p>
+        {% endif %}
+        
+        <div class="chart-meta">
+            <div class="meta-item">
+                <i class="fas fa-user"></i>
+                <span>{{ chart.patient.name }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <span>{{ chart.duration_days }} days</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-utensils"></i>
+                <span>{{ meal_items|length }} food items</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patient Information -->
+    <div class="patient-info">
+        <h3>
+            <i class="fas fa-user-md"></i>
+            Patient Information
+        </h3>
+        <div class="patient-details">
+            <div class="patient-detail">
+                <div class="patient-detail-label">Age</div>
+                <div class="patient-detail-value">{{ chart.patient.age|default:"Not specified" }}</div>
+            </div>
+            <div class="patient-detail">
+                <div class="patient-detail-label">Gender</div>
+                <div class="patient-detail-value">{{ chart.patient.get_gender_display }}</div>
+            </div>
+            <div class="patient-detail">
+                <div class="patient-detail-label">Prakriti</div>
+                <div class="patient-detail-value">{{ chart.patient.get_prakriti_display }}</div>
+            </div>
+            <div class="patient-detail">
+                <div class="patient-detail-label">BMI</div>
+                <div class="patient-detail-value">{{ chart.patient.bmi|default:"Not calculated" }}</div>
+            </div>
+            <div class="patient-detail">
+                <div class="patient-detail-label">Daily Calories</div>
+                <div class="patient-detail-value">{{ chart.patient.daily_calorie_needs|default:"Not calculated" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meal Plans with Recipes -->
+    {% regroup meal_items by meal_plan.meal_type as meal_groups %}
+    {% for meal_type, items in meal_groups %}
+        <div class="meal-section">
+            <h2 class="meal-title">
+                <div class="meal-icon">
+                    {% if meal_type == 'breakfast' %}
+                        <i class="fas fa-sun"></i>
+                    {% elif meal_type == 'lunch' %}
+                        <i class="fas fa-sun"></i>
+                    {% elif meal_type == 'dinner' %}
+                        <i class="fas fa-moon"></i>
+                    {% elif meal_type == 'snack' %}
+                        <i class="fas fa-apple-alt"></i>
+                    {% else %}
+                        <i class="fas fa-utensils"></i>
+                    {% endif %}
+                </div>
+                {{ meal_type|title }}
+            </h2>
+            
+            <div class="food-items">
+                {% for item in items %}
+                    <div class="food-item">
+                        <div class="food-name">{{ item.food.name }}</div>
+                        <div class="food-quantity">{{ item.quantity }} {{ item.unit }}</div>
+                        <div class="food-nutrition">
+                            {{ item.food.calories|floatformat:0 }} cal | 
+                            {{ item.food.protein|floatformat:1 }}g protein | 
+                            {{ item.food.carbohydrates|floatformat:1 }}g carbs
+                        </div>
+                        
+                        <!-- Recipe Links -->
+                        <div class="recipe-links">
+                            {% with recipes=food_recipes_map|lookup:item.food %}
+                                {% if recipes %}
+                                    {% for recipe in recipes %}
+                                        <a href="{% url 'diet_planner:recipe_detail' recipe.id %}" class="recipe-link">
+                                            <i class="fas fa-utensils"></i> {{ recipe.name }}
+                                        </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="no-recipes">
+                                        <i class="fas fa-info-circle"></i> No recipes available
+                                    </span>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+    
+    <!-- Summary -->
+    <div class="meal-section">
+        <h3 class="section-title">
+            <i class="fas fa-chart-bar"></i>
+            Diet Chart Summary
+        </h3>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Total Foods: {{ meal_items|length }}</h5>
+                <h5>Unique Foods: {{ meal_items|length|unique }}</h5>
+            </div>
+            <div class="col-md-6">
+                <h5>Recipes Available: 
+                    {% with total_recipes=0 %}
+                        {% for food, recipes in food_recipes_map.items %}
+                            {% if recipes %}{{ total_recipes|add:recipes|length }}{% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </h5>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add any JavaScript functionality here if needed
+</script>
+{% endblock %}
+

@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recipe Generator - {{ food.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .recipe-chat-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .chat-header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .food-info {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 15px;
+        margin-top: 20px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .food-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .food-detail {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .food-detail-label {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-bottom: 5px;
+    }
+    
+    .food-detail-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .chat-interface {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .chat-input-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chat-response-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .chat-form {
+        margin-bottom: 20px;
+    }
+    
+    .chat-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 100px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .chat-input:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    .btn-generate {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .btn-generate:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-generate:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .quick-prompts {
+        margin-top: 20px;
+    }
+    
+    .quick-prompts h4 {
+        color: #4a5568;
+        margin-bottom: 15px;
+        font-size: 1rem;
+    }
+    
+    .prompt-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .prompt-btn {
+        background: #f7fafc;
+        color: #4a5568;
+        padding: 8px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .prompt-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .response-content {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        min-height: 300px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .response-placeholder {
+        color: #a0aec0;
+        text-align: center;
+        padding: 40px 20px;
+        font-style: italic;
+    }
+    
+    .response-text {
+        line-height: 1.6;
+        color: #2d3748;
+        white-space: pre-wrap;
+    }
+    
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: #667eea;
+    }
+    
+    .spinner {
+        border: 3px solid rgba(0, 0, 0, 0.1);
+        border-left-color: #667eea;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .back-button {
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 12px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .back-button:hover {
+        background: #cbd5e0;
+        color: #2d3748;
+        text-decoration: none;
+    }
+    
+    .confidence-badge {
+        display: inline-block;
+        background: #48bb78;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+    
+    .youtube-section {
+        background: linear-gradient(135deg, #ff0000, #cc0000);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin: 20px 0;
+        text-align: center;
+    }
+    
+    .youtube-section h4 {
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .youtube-link {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .youtube-link:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .youtube-link i {
+        font-size: 1.2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .chat-interface {
+            grid-template-columns: 1fr;
+        }
+        
+        .food-details {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recipe-chat-container">
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+    
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <h1>🍳 AI Recipe Generator</h1>
+        <p>Get personalized recipes for {{ food.name }} using our AI chatbot</p>
+        
+        <div class="food-info">
+            <h3 style="margin-bottom: 15px;">{{ food.name }}</h3>
+            <div class="food-details">
+                <div class="food-detail">
+                    <div class="food-detail-label">Category</div>
+                    <div class="food-detail-value">{{ food.category }}</div>
+                </div>
+                <div class="food-detail">
+                    <div class="food-detail-label">Calories</div>
+                    <div class="food-detail-value">{{ food.calories }}/100g</div>
+                </div>
+                <div class="food-detail">
+                    <div class="food-detail-label">Taste</div>
+                    <div class="food-detail-value">{{ food.get_primary_taste_display }}</div>
+                </div>
+                <div class="food-detail">
+                    <div class="food-detail-label">Energy</div>
+                    <div class="food-detail-value">{{ food.get_energy_display }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Food Image Placeholder -->
+    <div class="text-center mb-4">
+        <div class="food-image-placeholder" style="max-width: 100%; height: 300px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+            {% if 'rice' in food.name.lower %}🍚
+            {% elif 'bread' in food.name.lower %}🍞
+            {% elif 'chicken' in food.name.lower %}🍗
+            {% elif 'fish' in food.name.lower %}🐟
+            {% elif 'vegetable' in food.name.lower %}🥬
+            {% elif 'fruit' in food.name.lower %}🍎
+            {% elif 'milk' in food.name.lower %}🥛
+            {% elif 'egg' in food.name.lower %}🥚
+            {% elif 'dal' in food.name.lower %}🫘
+            {% elif 'curry' in food.name.lower %}🍛
+            {% elif 'flax' in food.name.lower %}🌾
+            {% elif 'almond' in food.name.lower %}🥜
+            {% elif 'ginger' in food.name.lower %}🫚
+            {% else %}🍽️
+            {% endif %}
+        </div>
+        <p style="margin-top: 10px; color: #718096; font-style: italic;">AI will suggest the perfect image for your recipe!</p>
+    </div>
+    
+    <!-- Chat Interface -->
+    <div class="chat-interface">
+        <!-- Input Section -->
+        <div class="chat-input-section">
+            <h3 class="section-title">
+                <i class="fas fa-comment-dots"></i>
+                Request Recipe
+            </h3>
+            
+            <form class="chat-form" id="recipeForm">
+                {% csrf_token %}
+                <textarea 
+                    class="chat-input" 
+                    id="messageInput" 
+                    name="message" 
+                    placeholder="Describe what kind of recipe you want for {{ food.name }}. For example: 'Make a healthy breakfast recipe' or 'Create a traditional Indian preparation'"
+                    required>{{ default_prompt }}</textarea>
+                
+                <button type="submit" class="btn-generate" id="generateBtn">
+                    <i class="fas fa-magic"></i> Generate Recipe
+                </button>
+            </form>
+            
+            <div class="quick-prompts">
+                <h4>Quick Prompts:</h4>
+                <div class="prompt-buttons">
+                    <button class="prompt-btn" onclick="setPrompt('Create a healthy and nutritious recipe')">Healthy Recipe</button>
+                    <button class="prompt-btn" onclick="setPrompt('Make a traditional Indian preparation')">Traditional</button>
+                    <button class="prompt-btn" onclick="setPrompt('Create a quick and easy recipe')">Quick & Easy</button>
+                    <button class="prompt-btn" onclick="setPrompt('Make a recipe suitable for {{ food.get_vata_effect_display }} Vata')">Vata Friendly</button>
+                    <button class="prompt-btn" onclick="setPrompt('Create a recipe for {{ food.get_pitta_effect_display }} Pitta')">Pitta Friendly</button>
+                    <button class="prompt-btn" onclick="setPrompt('Make a recipe for {{ food.get_kapha_effect_display }} Kapha')">Kapha Friendly</button>
+                    <button class="prompt-btn" onclick="setPrompt('Create a recipe with video tutorial suggestions')">With Video Guide</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Response Section -->
+        <div class="chat-response-section">
+            <h3 class="section-title">
+                <i class="fas fa-utensils"></i>
+                Generated Recipe
+            </h3>
+            
+            <div class="response-content" id="responseContent">
+                <div class="response-placeholder">
+                    <i class="fas fa-robot" style="font-size: 3rem; margin-bottom: 15px; display: block; color: #cbd5e0;"></i>
+                    Enter your request and click "Generate Recipe" to get a personalized recipe for {{ food.name }}
+                </div>
+            </div>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <div>Generating your recipe...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('recipeForm');
+    const messageInput = document.getElementById('messageInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const responseContent = document.getElementById('responseContent');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        // Show loading state
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        loadingSpinner.style.display = 'block';
+        responseContent.innerHTML = '';
+        
+        // Send request
+        fetch('{% url "diet_planner:generate_recipe_chat" food.id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: `message=${encodeURIComponent(message)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                let youtubeSection = '';
+                if (data.youtube_url) {
+                    youtubeSection = `
+                        <div class="youtube-section">
+                            <h4><i class="fas fa-play-circle"></i> Watch Cooking Tutorial</h4>
+                            <a href="${data.youtube_url}" target="_blank" class="youtube-link">
+                                <i class="fab fa-youtube"></i> Search: "${data.youtube_search}"
+                            </a>
+                        </div>
+                    `;
+                }
+                
+                responseContent.innerHTML = `
+                    <div class="response-text">${data.response}</div>
+                    ${youtubeSection}
+                    <div class="confidence-badge">
+                        <i class="fas fa-check-circle"></i> Confidence: ${Math.round(data.confidence * 100)}%
+                    </div>
+                `;
+            } else {
+                responseContent.innerHTML = `
+                    <div class="response-placeholder">
+                        <i class="fas fa-exclamation-triangle" style="color: #f56565; font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        ${data.error || 'Error generating recipe. Please try again.'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            responseContent.innerHTML = `
+                <div class="response-placeholder">
+                    <i class="fas fa-exclamation-triangle" style="color: #f56565; font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    Error generating recipe. Please try again.
+                </div>
+            `;
+        })
+        .finally(() => {
+            // Hide loading state
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Recipe';
+            loadingSpinner.style.display = 'none';
+        });
+    });
+});
+
+function setPrompt(prompt) {
+    document.getElementById('messageInput').value = prompt;
+}
+</script>
+{% endblock %}

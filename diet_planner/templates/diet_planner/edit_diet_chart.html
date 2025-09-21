@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Diet Chart - {{ diet_chart.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-white mb-2">
+                        <i class="fas fa-edit me-3"></i>Edit Diet Chart
+                    </h1>
+                    <p class="text-white-50 mb-0">{{ diet_chart.title }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'diet_planner:diet_chart_detail' diet_chart.id %}" class="btn btn-outline-light me-2">
+                        <i class="fas fa-eye me-2"></i>View Chart
+                    </a>
+                    <a href="{% url 'diet_planner:patient_detail' diet_chart.patient.id %}" class="btn btn-outline-light">
+                        <i class="fas fa-user me-2"></i>Back to Patient
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chart Info -->
+            <div class="card glass-card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted mb-1">Patient</h6>
+                                <h5 class="mb-0">{{ diet_chart.patient.name }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted mb-1">Duration</h6>
+                                <h5 class="mb-0">{{ diet_chart.duration_days }} days</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted mb-1">Prakriti</h6>
+                                <h5 class="mb-0">{{ diet_chart.patient.get_prakriti_display }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6 class="text-muted mb-1">Total Foods</h6>
+                                <h5 class="mb-0">{{ all_foods.count }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form method="post" id="editDietChartForm">
+                {% csrf_token %}
+                
+                <!-- Day Navigation -->
+                <div class="card glass-card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-calendar-alt me-2"></i>Select Day to Edit
+                        </h5>
+                        <div class="btn-group" role="group">
+                            {% for day in days_range %}
+                            <button type="button" class="btn btn-outline-primary day-tab-btn" data-day="{{ day }}">
+                                Day {{ day }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day Content -->
+                {% for day_num in days_range %}
+                <div class="day-content" id="day-{{ day_num }}" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-utensils me-2"></i>Day {{ day_num }} - Meal Plan
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for meal_plan in meal_plans %}
+                                {% if meal_plan.day_number == day_num %}
+                                <div class="meal-section mb-4">
+                                    <h6 class="meal-title text-primary mb-3">
+                                        <i class="fas fa-{% if meal_plan.meal_type == 'breakfast' %}sun{% elif meal_plan.meal_type == 'lunch' %}sun{% elif meal_plan.meal_type == 'dinner' %}moon{% else %}cookie-bite{% endif %} me-2"></i>
+                                        {{ meal_plan.meal_type|title }}
+                                    </h6>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Food Item</th>
+                                                    <th>Category</th>
+                                                    <th>Quantity (g)</th>
+                                                    <th>Calories</th>
+                                                    <th>Protein</th>
+                                                    <th>Dosha Effects</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for meal_item in meal_plan.meal_items.all %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="food-icon me-3">
+                                                                <i class="fas fa-utensils text-primary"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0">{{ meal_item.food.name }}</h6>
+                                                                <small class="text-muted">{{ meal_item.food.subcategory|default:"General" }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">{{ meal_item.food.category }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" 
+                                                               name="meal_item_{{ meal_item.id }}" 
+                                                               value="{{ meal_item.quantity }}" 
+                                                               class="form-control form-control-sm" 
+                                                               min="1" 
+                                                               max="1000"
+                                                               style="width: 80px;">
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-success fw-bold">
+                                                            {{ meal_item.food.calories|floatformat:0 }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-info fw-bold">
+                                                            {{ meal_item.food.protein|floatformat:1 }}g
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dosha-effects">
+                                                            <small class="d-block">
+                                                                <span class="text-warning">V:</span> {{ meal_item.food.get_vata_effect_display }}
+                                                            </small>
+                                                            <small class="d-block">
+                                                                <span class="text-danger">P:</span> {{ meal_item.food.get_pitta_effect_display }}
+                                                            </small>
+                                                            <small class="d-block">
+                                                                <span class="text-info">K:</span> {{ meal_item.food.get_kapha_effect_display }}
+                                                            </small>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-outline-primary" 
+                                                                onclick="swapFood('{{ meal_item.id }}')">
+                                                            <i class="fas fa-exchange-alt me-1"></i>Swap
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% empty %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No meal plan for Day {{ day_num }}</h5>
+                                    <p class="text-muted">This day doesn't have any meal plans yet.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Food Swap Modal -->
+<div class="modal fade" id="swapModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Swap Food Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select a similar food to replace the current item:</p>
+                <div id="similarFoodsList">
+                    <!-- Similar foods will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.day-tab-btn.active {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: white;
+}
+
+.meal-section {
+    border-left: 4px solid var(--primary-gradient);
+    padding-left: 20px;
+}
+
+.food-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dosha-effects small {
+    font-size: 0.75rem;
+}
+
+.table th {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    font-weight: 600;
+}
+
+.table td {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: white;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.1);
+}
+</style>
+
+<script>
+// Day navigation
+document.querySelectorAll('.day-tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const day = this.dataset.day;
+        
+        // Update active button
+        document.querySelectorAll('.day-tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Show/hide day content
+        document.querySelectorAll('.day-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        document.getElementById(`day-${day}`).style.display = 'block';
+    });
+});
+
+// Set first day as active
+document.querySelector('.day-tab-btn').classList.add('active');
+
+// Food swap functionality
+function swapFood(mealItemId) {
+    fetch(`/diet-planner/api/meal-items/${mealItemId}/similar-foods/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSwapModal(mealItemId, data.similar_foods);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading similar foods');
+        });
+}
+
+function showSwapModal(mealItemId, similarFoods) {
+    const modalBody = document.getElementById('similarFoodsList');
+    modalBody.innerHTML = '';
+    
+    if (similarFoods.length === 0) {
+        modalBody.innerHTML = '<p class="text-muted">No similar foods found.</p>';
+    } else {
+        similarFoods.forEach(food => {
+            const foodCard = document.createElement('div');
+            foodCard.className = 'card mb-2';
+            foodCard.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${food.name}</h6>
+                            <small class="text-muted">${food.category} | ${food.calories} cal | ${food.protein}g protein</small>
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="selectFood('${mealItemId}', '${food.id}')">
+                            Select
+                        </button>
+                    </div>
+                </div>
+            `;
+            modalBody.appendChild(foodCard);
+        });
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('swapModal'));
+    modal.show();
+}
+
+function selectFood(mealItemId, foodId) {
+    fetch(`/diet-planner/api/meal-items/${mealItemId}/swap/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `new_food_id=${foodId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('swapModal'));
+            modal.hide();
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error swapping food');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Medical Document{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-upload"></i> Upload Medical Document</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.patient_name.id_for_label }}" class="form-label">
+                            <i class="fas fa-user"></i> Patient Name *
+                        </label>
+                        {{ form.patient_name }}
+                        {% if form.patient_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form.patient_name.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.patient_id.id_for_label }}" class="form-label">
+                            <i class="fas fa-id-card"></i> Patient ID
+                        </label>
+                        {{ form.patient_id }}
+                        <div class="form-text">Optional: Enter patient ID or medical record number</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.document_type.id_for_label }}" class="form-label">
+                            <i class="fas fa-file-medical"></i> Document Type *
+                        </label>
+                        {{ form.document_type }}
+                        {% if form.document_type.errors %}
+                            <div class="text-danger">
+                                {% for error in form.document_type.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.original_file.id_for_label }}" class="form-label">
+                            <i class="fas fa-file-upload"></i> Upload Document *
+                        </label>
+                        {{ form.original_file }}
+                        <div class="form-text">
+                            Supported formats: PDF, PNG, JPG, JPEG, TIFF (Max size: 10MB)
+                        </div>
+                        {% if form.original_file.errors %}
+                            <div class="text-danger">
+                                {% for error in form.original_file.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- File Preview -->
+                    <div id="filePreview" class="mb-3" style="display: none;">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6><i class="fas fa-eye"></i> File Preview</h6>
+                                <div id="previewContent"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'medical_dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-upload"></i> Upload & Process
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Upload Guidelines -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Upload Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check text-success"></i> Best Practices:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-arrow-right text-primary"></i> Use high-resolution images</li>
+                            <li><i class="fas fa-arrow-right text-primary"></i> Ensure good lighting and contrast</li>
+                            <li><i class="fas fa-arrow-right text-primary"></i> Avoid shadows and glare</li>
+                            <li><i class="fas fa-arrow-right text-primary"></i> Keep text straight and readable</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-exclamation-triangle text-warning"></i> Supported Documents:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-file-pdf text-danger"></i> Prescriptions</li>
+                            <li><i class="fas fa-file-medical text-info"></i> Lab Reports</li>
+                            <li><i class="fas fa-x-ray text-secondary"></i> Radiology Reports</li>
+                            <li><i class="fas fa-clipboard-list text-success"></i> Discharge Summaries</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.original_file.id_for_label }}');
+    const preview = document.getElementById('filePreview');
+    const previewContent = document.getElementById('previewContent');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Show file info
+            previewContent.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-file-medical fa-2x text-primary me-3"></i>
+                    <div>
+                        <strong>${file.name}</strong><br>
+                        <small class="text-muted">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                    </div>
+                </div>
+            `;
+            preview.style.display = 'block';
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+        } else {
+            preview.style.display = 'none';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Form submission with loading state
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}
+
+

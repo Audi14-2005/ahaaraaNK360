@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Import Foods CSV - Food Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .import-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-import {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-import:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 15px;
+    }
+    
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .csv-format-info {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .csv-format-info h4 {
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+    
+    .csv-format-info ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    .csv-format-info li {
+        margin-bottom: 8px;
+        color: #4a5568;
+    }
+    
+    .file-upload-area {
+        border: 2px dashed #cbd5e0;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .file-upload-area:hover {
+        border-color: #667eea;
+        background-color: #f7fafc;
+    }
+    
+    .file-upload-area.dragover {
+        border-color: #667eea;
+        background-color: #edf2f7;
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #a0aec0;
+        margin-bottom: 15px;
+    }
+    
+    .upload-text {
+        font-size: 1.1rem;
+        color: #4a5568;
+        margin-bottom: 10px;
+    }
+    
+    .upload-hint {
+        font-size: 0.9rem;
+        color: #718096;
+    }
+    
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-file-csv"></i> Import Foods CSV</h1>
+        <p>Upload a CSV file to add food items to the database</p>
+    </div>
+    
+    <div class="csv-format-info">
+        <h4><i class="fas fa-info-circle me-2"></i>CSV Format Requirements</h4>
+        <p>Your CSV file should contain the following columns (exact names required):</p>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Required Columns:</h6>
+                <ul>
+                    <li><strong>Food Item</strong> - Name of the food</li>
+                    <li><strong>Meal Type</strong> - Breakfast, Lunch, Dinner, Snack</li>
+                    <li><strong>Calories (k)</strong> - Calories per 100g</li>
+                    <li><strong>Carbs (g)</strong> - Carbohydrates per 100g</li>
+                    <li><strong>Protein (g)</strong> - Protein per 100g</li>
+                    <li><strong>Fat (g)</strong> - Fat per 100g</li>
+                    <li><strong>Fibre (g)</strong> - Fiber per 100g</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Optional Columns:</h6>
+                <ul>
+                    <li><strong>Category</strong> - Food category</li>
+                    <li><strong>Tags</strong> - Food tags</li>
+                    <li><strong>Rasa</strong> - Taste (Sweet, Sour, Salty, Pungent, Bitter, Astringent)</li>
+                    <li><strong>Virya</strong> - Energy (Heating, Cooling, Neutral)</li>
+                    <li><strong>Vipaka</strong> - Post-digestive effect (Sweet, Sour, Pungent)</li>
+                    <li><strong>Guna</strong> - Qualities (Light, Heavy, Dry, Oily, Cold, Hot)</li>
+                    <li><strong>Dosha Effect</strong> - Effect on doshas (Pacifies, Aggravates, Neutral)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i>
+            <strong>Tip:</strong> After importing, your foods will automatically be available in both the Food Scanner and Diet Planner systems!
+        </div>
+        <div class="alert alert-warning mt-2">
+            <i class="fas fa-download me-2"></i>
+            <strong>Need a template?</strong> 
+            <a href="/static/food_import_template.csv" download class="btn btn-sm btn-outline-warning ms-2">
+                <i class="fas fa-download me-1"></i>Download CSV Template
+            </a>
+        </div>
+    </div>
+    
+    <div class="import-card">
+        <form method="post" enctype="multipart/form-data" id="csvImportForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="csv_file">Select CSV File</label>
+                <div class="file-upload-area" id="fileUploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Click to upload or drag & drop your CSV file here</div>
+                    <div class="upload-hint">Supports CSV files (Max 10MB)</div>
+                    <input type="file" id="csv_file" name="csv_file" accept=".csv" style="display: none;" required>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="submit" class="btn-import">
+                    <i class="fas fa-upload me-2"></i>Import Foods
+                </button>
+                <a href="{% url 'food_scanner:food_database' %}" class="btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Database
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('csv_file');
+    const form = document.getElementById('csvImportForm');
+    
+    // Click to upload
+    fileUploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File selection
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileUploadArea.innerHTML = `
+                <div class="upload-icon" style="color: #48bb78;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="upload-text">${file.name}</div>
+                <div class="upload-hint">Click to change file</div>
+            `;
+        }
+    });
+    
+    // Drag and drop
+    fileUploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    fileUploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    fileUploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                fileInput.files = files;
+                fileUploadArea.innerHTML = `
+                    <div class="upload-icon" style="color: #48bb78;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="upload-text">${file.name}</div>
+                    <div class="upload-hint">Click to change file</div>
+                `;
+            } else {
+                alert('Please select a CSV file.');
+            }
+        }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Please select a CSV file first.');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Importing...';
+        submitBtn.disabled = true;
+    });
+});
+</script>
+{% endblock %}
+

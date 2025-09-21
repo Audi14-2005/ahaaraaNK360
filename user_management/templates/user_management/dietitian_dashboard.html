@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dietitian Dashboard - AAHAARA Care{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+    
+    .card-content {
+        color: #718096;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    .btn-card {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        color: white;
+    }
+    
+    .btn-info {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+    }
+    
+    .btn-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .appointment-item {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 15px 0;
+    }
+    
+    .appointment-item:last-child {
+        border-bottom: none;
+    }
+    
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .patient-name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .appointment-time {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .appointment-status {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-scheduled {
+        background: #e2e8f0;
+        color: #4a5568;
+    }
+    
+    .status-confirmed {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+    
+    .status-completed {
+        background: #bee3f8;
+        color: #2a4365;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1>👨‍⚕️ Dietitian Dashboard</h1>
+        <p>Welcome back, Dr. {{ user_profile.user.get_full_name }}!</p>
+    </div>
+    
+    <!-- Dashboard Cards -->
+    <div class="dashboard-grid">
+        <!-- Patient Management -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    👥
+                </div>
+                <div class="card-title">Patient Management</div>
+            </div>
+            <div class="card-content">
+                Manage your patients, view their health profiles, and track their progress.
+            </div>
+            <a href="{% url 'diet_planner:patient_list' %}" class="btn-card btn-primary">
+                View Patients
+            </a>
+        </div>
+        
+        <!-- Diet Planner -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                    🍽️
+                </div>
+                <div class="card-title">Diet Planner</div>
+            </div>
+            <div class="card-content">
+                Create personalized diet charts and meal plans for your patients.
+            </div>
+            <a href="{% url 'diet_planner:dashboard' %}" class="btn-card btn-success">
+                Open Diet Planner
+            </a>
+        </div>
+        
+        <!-- Food Database -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
+                    🥗
+                </div>
+                <div class="card-title">Food Database</div>
+            </div>
+            <div class="card-content">
+                Access comprehensive food database with nutritional and Ayurvedic information.
+            </div>
+            <a href="{% url 'diet_planner:food_database' %}" class="btn-card btn-warning">
+                View Database
+            </a>
+        </div>
+        
+        <!-- Recipe Collection -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);">
+                    👨‍🍳
+                </div>
+                <div class="card-title">Recipe Collection</div>
+            </div>
+            <div class="card-content">
+                Generate and manage cooking recipes with AI-powered suggestions.
+            </div>
+            <a href="{% url 'diet_planner:recipe_list' %}" class="btn-card btn-info">
+                View Recipes
+            </a>
+        </div>
+        
+        <!-- AAHAARA Care AI -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);">
+                    🤖
+                </div>
+                <div class="card-title">AAHAARA Care AI</div>
+            </div>
+            <div class="card-content">
+                Access AI-powered medical assistant for research and consultation support.
+            </div>
+            <a href="{% url 'aahaara_care:chat_dashboard' %}" class="btn-card btn-primary">
+                Open AAHAARA Care
+            </a>
+        </div>
+        
+        <!-- Medical OCR -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    📄
+                </div>
+                <div class="card-title">Medical OCR</div>
+            </div>
+            <div class="card-content">
+                Analyze medical documents and reports with AI-powered text recognition.
+            </div>
+            <a href="{% url 'medical_dashboard' %}" class="btn-card btn-success">
+                Open OCR
+            </a>
+        </div>
+        
+        <!-- Patient Analysis -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    🧘
+                </div>
+                <div class="card-title">Patient Analysis</div>
+            </div>
+            <div class="card-content">
+                Conduct Prakriti and Disease analysis for your patients to create personalized diet charts.
+            </div>
+            <a href="{% url 'user_management:prakriti_analysis' %}" class="btn-card btn-pink">
+                Start Analysis
+            </a>
+        </div>
+        
+        <!-- Health Summary -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                    📊
+                </div>
+                <div class="card-title">Health Summary</div>
+            </div>
+            <div class="card-content">
+                Generate comprehensive health summaries and calorie calculations for patients.
+            </div>
+            <a href="{% url 'user_management:health_summary' %}" class="btn-card btn-green">
+                Generate Summary
+            </a>
+        </div>
+    </div>
+    
+    <!-- Today's Appointments -->
+    {% if today_appointments %}
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 20px; color: #2d3748;">📅 Today's Appointments</h3>
+        {% for appointment in today_appointments %}
+        <div class="appointment-item">
+            <div class="appointment-header">
+                <div>
+                    <div class="patient-name">{{ appointment.patient.user.get_full_name }}</div>
+                    <div class="appointment-time">{{ appointment.appointment_date|date:"H:i" }} - {{ appointment.reason_for_visit|truncatechars:50 }}</div>
+                </div>
+                <span class="appointment-status status-{{ appointment.status }}">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Upcoming Appointments -->
+    {% if upcoming_appointments %}
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 20px; color: #2d3748;">📅 Upcoming Appointments</h3>
+        {% for appointment in upcoming_appointments %}
+        <div class="appointment-item">
+            <div class="appointment-header">
+                <div>
+                    <div class="patient-name">{{ appointment.patient.user.get_full_name }}</div>
+                    <div class="appointment-time">{{ appointment.appointment_date|date:"M d, Y H:i" }} - {{ appointment.reason_for_visit|truncatechars:50 }}</div>
+                </div>
+                <span class="appointment-status status-{{ appointment.status }}">
+                    {{ appointment.get_status_display }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Recent Patients -->
+    {% if patients %}
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 20px; color: #2d3748;">👥 Recent Patients</h3>
+        {% for patient in patients %}
+        <div class="appointment-item">
+            <div class="appointment-header">
+                <div>
+                    <div class="patient-name">{{ patient.user.get_full_name }}</div>
+                    <div class="appointment-time">Joined: {{ patient.created_at|date:"M d, Y" }}</div>
+                </div>
+                <a href="{% url 'diet_planner:patient_detail' patient.patient_profile.id %}" class="btn-card btn-primary" style="width: auto; padding: 8px 15px; font-size: 0.9rem;">
+                    View Profile
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
