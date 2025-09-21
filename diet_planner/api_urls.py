@@ -17,3 +17,4 @@ router.register(r'meal-items', MealItemViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 ]
+

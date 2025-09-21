@@ -26,7 +26,8 @@ def dashboard(request):
         if user_profile.user_type == 'patient':
             # Patient view - show only their diet charts
             try:
-                diet_patient = user_profile.diet_patient
+                # Find the Patient instance linked to this user_profile
+                diet_patient = Patient.objects.get(user_profile=user_profile)
                 # Get diet charts for this patient
                 diet_charts = DietChart.objects.filter(patient=diet_patient).order_by('-created_at')
                 
@@ -37,7 +38,15 @@ def dashboard(request):
                 }
                 return render(request, 'diet_planner/patient_dashboard.html', context)
                 
-            except:
+            except Patient.DoesNotExist:
+                # If no diet_patient exists, show empty state
+                context = {
+                    'user_profile': user_profile,
+                    'diet_charts': [],
+                    'is_patient': True,
+                }
+                return render(request, 'diet_planner/patient_dashboard.html', context)
+            except Exception as e:
                 # If no diet_patient exists, show empty state
                 context = {
                     'user_profile': user_profile,
@@ -1539,7 +1548,7 @@ def generate_recipe_ai(request, food_id):
     except Exception as e:
         logger.error(f"Error in generate_recipe_ai: {e}")
         messages.error(request, f"Error generating recipe: {str(e)}")
-        return redirect('diet_planner:food_list')
+        return redirect('diet_planner:food_database')
     food_recipes_map = {}
     for item in meal_items:
         if item.food not in food_recipes_map:
@@ -1651,4 +1660,4 @@ def generate_recipe_ai(request, food_id):
     except Exception as e:
         logger.error(f"Error in generate_recipe_ai: {e}")
         messages.error(request, f"Error generating recipe: {str(e)}")
-        return redirect('diet_planner:food_list')
+        return redirect('diet_planner:food_database')

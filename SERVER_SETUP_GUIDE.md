@@ -179,3 +179,5 @@ For production, consider using:
 - Cloud platforms (AWS, Heroku, etc.)
 
 This setup is only for development purposes.
+
+

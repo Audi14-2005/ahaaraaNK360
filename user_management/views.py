@@ -106,12 +106,15 @@ def patient_dashboard(request):
         patient=user_profile
     ).order_by('-appointment_date')[:5]
     
-    # Get diet charts (if any) - using the new relationship
-    from diet_planner.models import DietChart
+    # Get diet charts (if any) - using the correct relationship
+    from diet_planner.models import DietChart, Patient
     try:
-        diet_patient = user_profile.diet_patient
+        # Find the Patient instance linked to this user_profile
+        diet_patient = Patient.objects.get(user_profile=user_profile)
         diet_charts = DietChart.objects.filter(patient=diet_patient).order_by('-created_at')[:5]
-    except:
+    except Patient.DoesNotExist:
+        diet_charts = []
+    except Exception as e:
         diet_charts = []
     
     context = {

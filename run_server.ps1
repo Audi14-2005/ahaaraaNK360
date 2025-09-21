@@ -8,3 +8,5 @@ Write-Host "Server will be available at: http://127.0.0.1:$Port" -ForegroundColo
 Write-Host "Press Ctrl+C to stop the server" -ForegroundColor Cyan
 
 python run_server.py $Port
+
+
